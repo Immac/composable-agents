@@ -76,11 +76,18 @@ export function validatePipeline(
 }
 
 function validateStep(
-  step: SequenceStep,
+  step: SequenceStep | string,
   registry: AgentRegistry,
   errors: string[],
   warnings: string[],
 ): void {
+  if (typeof step === 'string') {
+    if (!registry.has(step)) {
+      errors.push(`Agent "${step}" is not registered`);
+    }
+    return;
+  }
+
   if ('sequence' in step && step.sequence) {
     for (const sub of step.sequence) {
       validateStep(sub, registry, errors, warnings);
