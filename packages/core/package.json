@@ -23,6 +23,7 @@
     "vitest": "^2.0.0"
   },
   "dependencies": {
+    "sharp": "^0.34.5",
     "yaml": "^2.9.0"
   }
 }
