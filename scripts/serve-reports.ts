@@ -55,20 +55,19 @@ function scanReports(): ReportMeta[] {
   const examples = resolve(ROOT, 'examples');
   if (existsSync(examples)) {
     for (const proj of readdirSync(examples)) {
-      const mdPath = join(examples, proj, 'test-results', 'report.md');
-      if (!existsSync(mdPath)) continue;
+      const reportPath = join(examples, proj, 'test-results', 'report.md');
+      if (!existsSync(reportPath)) continue;
 
-      const md = readFileSync(mdPath, 'utf-8');
+      const md = readFileSync(reportPath, 'utf-8');
       const title = md.match(/^#\s+(.+)/m)?.[1] ?? `${proj} — Test Report`;
       const tests = parseTestTable(md);
-      const passCount = tests.filter(t => t.result === 'pass').length;
 
       reports.push({
         id: proj,
         project: proj,
         title,
         tests,
-        passCount,
+        passCount: tests.filter(t => t.result === 'pass').length,
         totalCount: tests.length,
       });
     }
@@ -93,7 +92,6 @@ function parseTestTable(md: string): TestEntry[] {
 }
 
 function getReportContent(id: string): string | null {
-  // Check examples/*/test-results/report.md
   const examples = resolve(ROOT, 'examples');
   if (existsSync(examples)) {
     for (const proj of readdirSync(examples)) {
@@ -132,7 +130,7 @@ app.get('/api/reports/:id', (c) => {
 
 // Serve static assets (benchmark reports, images, etc.)
 app.get('/output/*', (c) => {
-  const filePath = resolve(ROOT, c.req.path.slice(1)); // strip leading /
+  const filePath = resolve(ROOT, c.req.path.slice(1));
   if (!existsSync(filePath) || statSync(filePath).isDirectory()) return c.notFound();
   const ext = extname(filePath);
   const mime: Record<string, string> = {
@@ -166,76 +164,110 @@ app.get('/', (c) => {
 <style>
   body { font-family: 'Inter', -apple-system, sans-serif; }
   code, pre { font-family: 'JetBrains Mono', monospace; }
-  .report h1 { @apply text-2xl font-bold mb-4 pb-2 border-b border-gray-200; }
-  .report h2 { @apply text-xl font-semibold mt-8 mb-3; }
-  .report h3 { @apply text-lg font-semibold mt-6 mb-2 text-blue-600; }
-  .report p { @apply my-2 leading-relaxed; }
-  .report table { @apply w-full border-collapse my-4 text-sm; }
-  .report th { @apply bg-gray-50 font-semibold text-left; }
-  .report th, .report td { @apply px-3 py-2 border border-gray-200; }
-  .report pre { @apply bg-gray-50 rounded-lg p-4 my-3 overflow-x-auto text-sm; }
-  .report code { @apply text-sm; }
-  .report p code { @apply bg-gray-100 px-1.5 py-0.5 rounded text-sm; }
-  .report hr { @apply my-8 border-gray-200; }
-  .report strong { @apply text-gray-900; }
-  .report iframe { @apply rounded-xl border-0 w-full; min-height: 80vh; }
+  .report h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid #e5e7eb; }
+  .report h2 { font-size: 1.25rem; font-weight: 600; margin-top: 2.5rem; margin-bottom: 1rem; }
+  .report h3 { font-size: 1.125rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.75rem; color: #2563eb; }
+  .report p { margin: 0.75rem 0; line-height: 1.625; color: #374151; }
+  .report table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 0.875rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); border-radius: 0.5rem; overflow: hidden; }
+  .report thead { background: #f3f4f6; }
+  .report th { font-weight: 600; text-align: left; color: #374151; padding: 0.75rem 1rem; border-bottom: 2px solid #e5e7eb; }
+  .report td { padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6; }
+  .report tbody tr:hover { background: #f9fafb; }
+  .report tbody tr:last-child td { border-bottom: 0; }
+  .report pre { background: #f9fafb; border-radius: 0.5rem; padding: 1.25rem; margin: 1rem 0; overflow-x: auto; font-size: 0.875rem; border: 1px solid #f3f4f6; }
+  .report code { font-size: 0.875rem; }
+  .report p code { background: #f3f4f6; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; }
+  .report hr { margin: 2.5rem 0; border: 0; border-top: 1px solid #e5e7eb; }
+  .report strong { color: #111827; font-weight: 600; }
+  .report iframe { border-radius: 0.75rem; border: 1px solid #e5e7eb; width: 100%; min-height: 80vh; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); }
+  .report blockquote { border-left: 4px solid #60a5fa; padding-left: 1rem; font-style: italic; color: #4b5563; margin: 1rem 0; }
+  .report ul { list-style: disc; padding-left: 1.25rem; margin: 0.75rem 0; }
+  .report ol { list-style: decimal; padding-left: 1.25rem; margin: 0.75rem 0; }
 
-  /* Sidebar scrollbar */
-  #sidebar::-webkit-scrollbar { width: 6px; }
+  @media (prefers-color-scheme: dark) {
+    .report h1 { border-bottom-color: #374151; }
+    .report h3 { color: #60a5fa; }
+    .report thead { background: #1f2937; }
+    .report th { color: #d1d5db; border-bottom-color: #4b5563; }
+    .report td { border-bottom-color: #1f2937; }
+    .report tbody tr:hover { background: #111827; }
+    .report pre { background: #111827; border-color: #374151; }
+    .report p code { background: #1f2937; }
+    .report hr { border-top-color: #374151; }
+    .report strong { color: #f9fafb; }
+    .report p { color: #d1d5db; }
+    .report blockquote { color: #9ca3af; }
+  }
+
+  #sidebar::-webkit-scrollbar { width: 5px; }
   #sidebar::-webkit-scrollbar-track { background: transparent; }
   #sidebar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
   #sidebar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
-  .dark #sidebar::-webkit-scrollbar-thumb { background: #4b5563; }
-  .dark #sidebar::-webkit-scrollbar-thumb:hover { background: #6b7280; }
 
+  .test-entry { transition: all 0.15s ease; }
+  .test-entry:hover { transform: translateX(2px); }
 
-
-  /* Active project indicator */
+  .project-header { cursor: pointer; transition: background 0.15s; }
+  .project-header:hover { background: #f9fafb; }
   .project-header.active-project {
-    @apply bg-gray-100 dark:bg-gray-800;
+    background: rgba(59,130,246,0.08);
     box-shadow: inset 3px 0 0 #3b82f6;
   }
-
+  .project-header.active-project:hover { background: rgba(59,130,246,0.08); }
   @media (prefers-color-scheme: dark) {
-    .report h1 { @apply border-gray-700; }
-    .report h3 { @apply text-blue-400; }
-    .report th { @apply bg-gray-800; }
-    .report th, .report td { @apply border-gray-700; }
-    .report pre { @apply bg-gray-800/50; }
-    .report p code { @apply bg-gray-800; }
-    .report hr { @apply border-gray-700; }
-    .report strong { @apply text-gray-100; }
+    .project-header.active-project { background: rgba(59,130,246,0.15); }
+    #sidebar::-webkit-scrollbar-thumb { background: #4b5563; }
+    #sidebar::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+  }
+
+  .status-badge { display: inline-flex; align-items: center; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+  .status-badge.pass { background: #dcfce7; color: #166534; }
+  .status-badge.fail { background: #fee2e2; color: #991b1b; }
+  .status-badge.info { background: #f3f4f6; color: #4b5563; }
+  .hidden { display: none !important; }
+  .test-entry:hover span:last-child { opacity: 1 !important; }
+  @media (prefers-color-scheme: dark) {
+    .status-badge.pass { background: rgba(34,197,94,0.15); color: #86efac; }
+    .status-badge.fail { background: rgba(239,68,68,0.15); color: #fca5a5; }
+    .status-badge.info { background: #374151; color: #d1d5db; }
   }
 </style>
 </head>
-<body class="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-  <div id="app" class="flex h-screen">
-    <!-- Sidebar -->
-    <aside class="w-80 min-w-[20rem] border-r border-gray-200 dark:border-gray-800 flex flex-col bg-gray-50/50 dark:bg-gray-900/50">
-      <header class="px-5 py-4 border-b border-gray-200 dark:border-gray-800">
-        <h1 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Test Reports</h1>
+<body style="min-height:100vh;background:#f9fafb;color:#111827;">
+  <div id="app" style="display:flex;height:100vh;">
+    <aside style="width:22rem;min-width:22rem;border-right:1px solid #e5e7eb;display:flex;flex-direction:column;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,0.03);z-index:10;">
+      <header style="padding:1rem 1.25rem;border-bottom:1px solid #e5e7eb;background:#f9fafb;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          <h1 style="font-size:0.75rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.1em;">Test Reports</h1>
+        </div>
+        <div style="position:relative;">
+          <svg style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);width:1rem;height:1rem;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input id="test-filter" type="text" placeholder="Filter tests..."
+            style="width:100%;padding:0.5rem 0.75rem 0.5rem 2.25rem;background:#f3f4f6;border:0;border-radius:0.5rem;font-size:0.875rem;outline:none;"
+            oninput="filterTests(this.value)"/>
+        </div>
       </header>
-      <nav id="sidebar" class="flex-1 overflow-y-auto">
-        <div class="p-4 text-center text-sm text-gray-400">Loading...</div>
+      <nav id="sidebar" style="flex:1;overflow-y:auto;">
+        <div style="padding:1rem;text-align:center;font-size:0.875rem;color:#9ca3af;">Loading...</div>
       </nav>
     </aside>
 
-    <!-- Main content -->
-    <main class="flex-1 overflow-y-auto bg-white dark:bg-gray-950">
-      <div id="welcome" class="flex flex-col items-center justify-center h-full text-gray-400">
-        <div class="text-5xl mb-4">🧪</div>
-        <h2 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Select a project</h2>
-        <p class="text-sm max-w-sm text-center">Choose a project from the sidebar to view test reports and results.</p>
+    <main style="flex:1;overflow-y:auto;background:#f9fafb;">
+      <div id="welcome" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#9ca3af;">
+        <div style="background:#fff;border-radius:1rem;padding:2.5rem;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);border:1px solid #f3f4f6;text-align:center;">
+          <div style="font-size:3rem;margin-bottom:1.25rem;">🧪</div>
+          <h2 style="font-size:1.25rem;font-weight:600;color:#374151;margin-bottom:0.5rem;">Select a project</h2>
+          <p style="font-size:0.875rem;max-width:20rem;color:#6b7280;">Choose a project from the sidebar to view test reports and results.</p>
+        </div>
       </div>
-      <div id="content" class="hidden p-8 max-w-6xl mx-auto report"></div>
+      <div id="content" class="hidden" style="padding:2rem;max-width:64rem;margin:0 auto;"></div>
     </main>
   </div>
 
 <script>
 const API = '/api/reports';
 let reports = [];
-
-// ── Fetch reports ──────────────────────────────────────────
 
 async function loadReports() {
   try {
@@ -244,66 +276,67 @@ async function loadReports() {
     renderSidebar();
   } catch (e) {
     document.querySelector('#sidebar').innerHTML =
-      '<div class="p-4 text-center text-sm text-red-500">Failed to load reports</div>';
+      '<div style="padding:1rem;text-align:center;font-size:0.875rem;color:#ef4444;">Failed to load reports</div>';
   }
 }
-
-// ── Sidebar ────────────────────────────────────────────────
 
 function renderSidebar() {
   const nav = document.querySelector('#sidebar');
   if (!reports.length) {
-    nav.innerHTML = '<div class="p-4 text-center text-sm text-gray-400">No reports found</div>';
+    nav.innerHTML = '<div style="padding:1rem;text-align:center;font-size:0.875rem;color:#9ca3af;">No reports found</div>';
     return;
   }
 
   nav.innerHTML = reports.map((r, i) => {
-    const summary = r.totalCount > 0
-      ? \`<span class="project-summary text-xs \${r.passCount === r.totalCount ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}">\${r.passCount}/\${r.totalCount} pass</span>\`
-      : '';
+    let badge = '';
+    if (r.totalCount > 0) {
+      const cls = r.passCount === r.totalCount ? 'pass' : r.passCount === 0 ? 'fail' : 'info';
+      badge = '<span class="status-badge ' + cls + '">' + r.passCount + '/' + r.totalCount + '</span>';
+    }
 
     const testsHtml = r.tests.map(t => {
-      const icon = t.result === 'pass' ? '✓' : t.result === 'fail' ? '✗' : '?';
-      const cls = t.result === 'pass' ? 'text-green-600 dark:text-green-400'
-        : t.result === 'fail' ? 'text-red-500'
-        : 'text-gray-400';
-      return \`<button onclick="showTest('\${r.id}','\${t.id}')"
-        class="test-entry w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors text-left"
-        data-project="\${r.id}" data-test="\${t.id}">
-        <span class="\${cls} font-bold w-4 text-center shrink-0">\${icon}</span>
-        <span class="text-blue-600 dark:text-blue-400 font-mono text-xs w-16 shrink-0">\${t.id}</span>
-        <span class="flex-1 truncate">\${h(t.name)}</span>
-        <span class="text-gray-400 text-xs font-mono shrink-0">\${t.time}</span>
-      </button>\`;
+      let icon = '';
+      if (t.result === 'pass') {
+        icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>';
+      } else if (t.result === 'fail') {
+        icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>';
+      } else {
+        icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+      }
+      const nameClass = (t.name.toLowerCase().includes('rejected') || t.name.toLowerCase().includes('empty')) ? 'color:#d97706;' : '';
+      return '<button onclick="showTest(' + JSON.stringify(r.id) + ',' + JSON.stringify(t.id) + ')"' +
+        ' class="test-entry" style="width:100%;display:flex;align-items:center;gap:0.75rem;padding:0.625rem 1rem;font-size:0.875rem;border-radius:0.5rem;text-align:left;border:0;background:transparent;cursor:pointer;color:#374151;"' +
+        ' data-project="' + h(r.id) + '" data-test="' + h(t.id) + '" data-filter-text="' + h((t.id + ' ' + t.name).toLowerCase()) + '">' +
+        '<span style="flex-shrink:0;">' + icon + '</span>' +
+        '<span style="font-family:monospace;font-size:0.75rem;color:#2563eb;width:3.5rem;flex-shrink:0;">' + h(t.id) + '</span>' +
+        '<span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;' + nameClass + '">' + h(t.name) + '</span>' +
+        '<span style="color:#9ca3af;font-size:0.75rem;font-family:monospace;flex-shrink:0;opacity:0;transition:opacity 0.15s;">' + h(t.time) + '</span>' +
+      '</button>';
     }).join('');
 
-    return \`<div class="project border-b border-gray-100 dark:border-gray-800" data-project="\${r.id}">
-      <button onclick="toggle(\${i})"
-        class="project-header w-full flex items-center gap-2 px-5 py-3 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left">
-        <svg class="chevron w-3 h-3 text-gray-400 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
-        <span class="flex-1">\${h(r.project)}</span>
-        \${summary}
-      </button>
-      <div class="tests-panel hidden pl-7 pr-3 pb-3 space-y-0.5">
-        \${testsHtml || '<div class="text-xs text-gray-400 px-3 py-1">Benchmark report</div>'}
-        <button onclick="showReport('\${r.id}')"
-          class="w-full text-left px-3 py-1.5 text-xs text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
-          📄 View full report →
-        </button>
-      </div>
-    </div>\`;
+    return '<div class="project" style="border-bottom:1px solid #f3f4f6;" data-project="' + h(r.id) + '">' +
+      '<button onclick="toggle(' + i + ')"' +
+        ' style="width:100%;display:flex;align-items:center;gap:0.75rem;padding:0.875rem 1.25rem;font-size:0.875rem;font-weight:600;color:#111827;text-align:left;border:0;background:transparent;cursor:pointer;transition:background 0.15s;"' +
+        ' class="project-header">' +
+        '<svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform 0.2s;"><polyline points="9 18 15 12 9 6"/></svg>' +
+        '<span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + h(r.project) + '</span>' +
+        '<span style="flex-shrink:0;">' + badge + '</span>' +
+      '</button>' +
+      '<div class="tests-panel hidden" style="padding:0 1rem 0.75rem 2.75rem;">' +
+        (testsHtml || '<div style="font-size:0.75rem;color:#9ca3af;padding:0.5rem 1rem;">Benchmark / visual report</div>') +
+        '<button onclick="showReport(' + JSON.stringify(r.id) + ')" style="width:100%;text-align:left;padding:0.5rem 1rem;font-size:0.875rem;color:#2563eb;border:0;background:transparent;border-radius:0.5rem;cursor:pointer;margin-top:0.25rem;display:flex;align-items:center;gap:0.5rem;">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>' +
+          '<span>Full Report</span>' +
+        '</button>' +
+      '</div>' +
+    '</div>';
   }).join('');
 
-  // Open first project that HAS tests (skip benchmarks with 0 tests)
+  // Open first project with tests
   const candidates = nav.querySelectorAll('.project');
   let target = null;
   for (const c of candidates) {
-    const summary = c.querySelector('.project-summary');
-    if (summary && summary.textContent.trim() !== '(' && summary.textContent.trim() !== '') {
-      target = c; break;
-    }
+    if (c.querySelector('.status-badge')) { target = c; break; }
   }
   target = target || candidates[0];
   if (target) {
@@ -324,37 +357,73 @@ function toggle(i) {
   chevron.style.transform = isOpen ? '' : 'rotate(90deg)';
 }
 
-function h(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function filterTests(q) {
+  const term = q.toLowerCase().trim();
+  document.querySelectorAll('.test-entry').forEach(e => {
+    const text = e.getAttribute('data-filter-text') || '';
+    e.style.display = (!term || text.includes(term)) ? '' : 'none';
+  });
+  document.querySelectorAll('.project').forEach(p => {
+    const visible = p.querySelectorAll('.test-entry:not([style*="display: none"])');
+    const panel = p.querySelector('.tests-panel');
+    const chevron = p.querySelector('.chevron');
+    if (term && visible.length > 0 && panel.classList.contains('hidden')) {
+      panel.classList.remove('hidden');
+      chevron.style.transform = 'rotate(90deg)';
+    }
+  });
+}
 
-// ── Content ────────────────────────────────────────────────
+function h(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 async function showReport(id) {
   document.querySelector('#welcome').classList.add('hidden');
   const content = document.querySelector('#content');
   content.classList.remove('hidden');
-  content.innerHTML = '<div class="text-center py-8 text-gray-400">Loading...</div>';
+  content.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;padding:5rem 0;color:#9ca3af;"><svg class="animate-spin" width="32" height="32" viewBox="0 0 24 24" fill="none" style="margin-right:0.75rem;color:#3b82f6;"><circle style="opacity:0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path style="opacity:0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Loading report...</div>';
 
   try {
-    const res = await fetch(\`/api/reports/\${id}\`);
+    const res = await fetch('/api/reports/' + encodeURIComponent(id));
     const data = await res.json();
 
     if (data.variant === 'iframe') {
-      content.innerHTML = \`<iframe src="../output/benchmark/report/index.html"></iframe>\`;
+      content.innerHTML = '<iframe src="../output/benchmark/report/index.html" style="border-radius:0.75rem;border:1px solid #e5e7eb;width:100%;min-height:80vh;box-shadow:0 1px 2px 0 rgba(0,0,0,0.05);"></iframe>';
     } else if (data.variant === 'markdown' && data.content) {
-      content.innerHTML = marked.parse(data.content);
+      const meta = data.meta;
+      let badge = '';
+      if (meta.totalCount > 0) {
+        const cls = meta.passCount === meta.totalCount ? 'pass' : 'info';
+        badge = '<span class="status-badge ' + cls + '">' + meta.passCount + '/' + meta.totalCount + ' tests passing</span>';
+      }
+      const headerHtml = '<div style="margin-bottom:1.5rem;">' +
+        '<div style="display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;color:#6b7280;margin-bottom:0.25rem;">' +
+          '<span>Test Reports</span>' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>' +
+          '<span style="font-weight:500;color:#374151;">' + h(meta.project) + '</span>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:0.75rem;">' +
+          '<h1 style="font-size:1.875rem;font-weight:700;color:#111827;">' + h(meta.title) + '</h1>' +
+          badge +
+        '</div>' +
+      '</div>';
+      content.innerHTML = headerHtml + marked.parse(data.content);
     } else {
-      content.innerHTML = '<div class="text-center py-8 text-red-500">Report content not found</div>';
+      content.innerHTML = '<div style="text-align:center;padding:3rem 0;color:#ef4444;">Report content not found</div>';
     }
   } catch (e) {
-    content.innerHTML = '<div class="text-center py-8 text-red-500">Failed to load report</div>';
+    content.innerHTML = '<div style="text-align:center;padding:3rem 0;color:#ef4444;">Failed to load report</div>';
   }
 
-  // Highlight active project in sidebar
-  document.querySelectorAll('.project-header').forEach(h => h.classList.remove('bg-gray-100','dark:bg-gray-800','active-project'));
-  const activeProj = document.querySelector(\`[data-project="\${id}"] .project-header\`);
-  if (activeProj) activeProj.classList.add('bg-gray-100','dark:bg-gray-800','active-project');
+  document.querySelectorAll('.project-header').forEach(h => {
+    h.classList.remove('active-project');
+    h.style.background = 'transparent';
+  });
+  const activeProj = document.querySelector('[data-project="' + id + '"] .project-header');
+  if (activeProj) {
+    activeProj.classList.add('active-project');
+    activeProj.style.background = '';
+  }
 
-  // Ensure the parent project is open
   const parent = activeProj?.closest('.project');
   if (parent) {
     const panel = parent.querySelector('.tests-panel');
@@ -363,26 +432,27 @@ async function showReport(id) {
     if (chevron) chevron.style.transform = 'rotate(90deg)';
   }
 
-  // Clear test highlights
-  document.querySelectorAll('.test-entry').forEach(e => e.classList.remove('bg-blue-100','dark:bg-blue-900','text-blue-700','dark:text-blue-300'));
+  document.querySelectorAll('.test-entry').forEach(e => {
+    e.style.background = 'transparent';
+    e.style.outline = 'none';
+  });
 }
 
 async function showTest(projectId, testId) {
   await showReport(projectId);
   document.querySelectorAll('.test-entry').forEach(e => {
-    e.classList.remove('bg-blue-100','dark:bg-blue-900','text-blue-700','dark:text-blue-300');
+    e.style.background = 'transparent';
+    e.style.outline = 'none';
   });
-  const entry = document.querySelector(\`[data-project="\${projectId}"][data-test="\${testId}"]\`);
+  const entry = document.querySelector('[data-project="' + projectId + '"][data-test="' + testId + '"]');
   if (entry) {
-    entry.classList.add('bg-blue-100','dark:bg-blue-900','text-blue-700','dark:text-blue-300');
+    entry.style.background = 'rgba(59,130,246,0.08)';
+    entry.style.outline = '1px solid rgba(59,130,246,0.3)';
     entry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
-  // Scroll to test section in report
   const anchor = document.getElementById(testId.toLowerCase());
   if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-
-// ── Init ───────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', loadReports);
 </script>
