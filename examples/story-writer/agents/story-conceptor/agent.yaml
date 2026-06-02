@@ -1,0 +1,11 @@
+id: story-conceptor
+type: llm
+version: 0.1.0
+purpose: "Analyze the user prompt and produce a structured story concept — genre, tone, setting, characters, plot outline"
+
+llm:
+  temperature: 0.7
+  max_tokens: 1024
+
+learning:
+  channels: []

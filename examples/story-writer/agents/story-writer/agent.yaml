@@ -1,0 +1,11 @@
+id: story-writer
+type: llm
+version: 0.1.0
+purpose: "Write narrative prose from a story concept in the cabinet"
+
+llm:
+  temperature: 0.8
+  max_tokens: 2048
+
+learning:
+  channels: []
