@@ -1,0 +1,16 @@
+{
+  "name": "composable-agents-cli",
+  "version": "0.1.0",
+  "description": "CLI tools for the Composable Agents framework",
+  "type": "module",
+  "bin": {
+    "composable-agents": "./src/cli.ts"
+  },
+  "dependencies": {
+    "composable-agents": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "tsx": "^4.22.0"
+  }
+}
