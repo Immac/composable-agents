@@ -52,3 +52,5 @@ export { builtinEvaluators } from './conditions/built-in';
 // LLM
 export { MockProvider } from './llm/mock-provider';
 export type { MockResponse } from './llm/mock-provider';
+export { PiProvider } from './llm/pi-provider';
+export type { PiProviderOptions } from './llm/pi-provider';
