@@ -40,6 +40,15 @@ export {
   log,
 } from './lessons/handlers';
 
+// Loader
+export { loadAgentYaml, validateAgentManifest, AgentRegistry } from './loader/agent-loader';
+export { loadPipelineYaml, validatePipeline } from './loader/pipeline-loader';
+export type { LoadResult, LoadError } from './loader/agent-loader';
+export type { PipelineConfig, ValidationResult } from './loader/pipeline-loader';
+
+// Built-in conditions
+export { builtinEvaluators } from './conditions/built-in';
+
 // LLM
 export { MockProvider } from './llm/mock-provider';
 export type { MockResponse } from './llm/mock-provider';
