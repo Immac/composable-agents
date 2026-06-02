@@ -29,39 +29,46 @@ export async function execute(
 ): Promise<AgentResult> {
   if (signal?.aborted) return { status: 'aborted' };
 
-  // Self-check: if ratio is preserved, write a fill strategy and short-circuit
-  const ratioChanged = scope.cabinet.get('dimensions/ratio-changed') as boolean | undefined;
-  if (ratioChanged === false) {
-    const plan = scope.cabinet.get('dimensions/plan') as DimensionPlan | undefined;
-    const strategy: StrategyPlan = {
-      targetWidth: plan?.snappedWidth ?? 1024,
-      targetHeight: plan?.snappedHeight ?? 1024,
-      resizeMode: 'fill',
-      description: `Direct resize to ${plan?.snappedWidth}×${plan?.snappedHeight} (ratio preserved)`,
-    };
-    scope.cabinet.put('strategy/plan', strategy);
-    scope.blackboard.setTaskOutput('Ratio preserved — direct fill');
-    return { status: 'success', output: `Fill ${strategy.targetWidth}×${strategy.targetHeight}` };
-  }
-
   const plan = scope.cabinet.get('dimensions/plan') as DimensionPlan | undefined;
   if (!plan) {
     return { status: 'failed', error: 'No dimension plan found' };
   }
 
-  // Ratio changed — use contain (pad) to avoid losing image content
-  // Sharp's "contain" mode resizes to fit within the box, maintaining ratio
-  // and pads the remaining space
-  const strategy: StrategyPlan = {
-    targetWidth: plan.snappedWidth,
-    targetHeight: plan.snappedHeight,
-    resizeMode: 'contain',
-    background: { r: 0, g: 0, b: 0, alpha: 0 }, // transparent padding
-    description: `Resize to fit ${plan.snappedWidth}×${plan.snappedHeight} with padding (ratio delta: ${plan.ratioDifference}%)`,
-  };
+  // Read decision from strategy-analyzer (or composition-analyzer fallback)
+  const decision = scope.cabinet.get('strategy/decision') as
+    { strategy: string; confidence?: number; reasoning?: string } | undefined;
+
+  let strategy: StrategyPlan;
+
+  if (plan.ratioChanged === false) {
+    // Ratio preserved — direct fill
+    strategy = {
+      targetWidth: plan.snappedWidth,
+      targetHeight: plan.snappedHeight,
+      resizeMode: 'fill',
+      description: `Direct resize to ${plan.snappedWidth}×${plan.snappedHeight} (ratio preserved)`,
+    };
+  } else if (decision?.strategy === 'cover') {
+    // Strategy analyzer chose cover (crop to fill)
+    strategy = {
+      targetWidth: plan.snappedWidth,
+      targetHeight: plan.snappedHeight,
+      resizeMode: 'cover',
+      description: `Crop to fill ${plan.snappedWidth}×${plan.snappedHeight} (ratio delta: ${plan.ratioDifference}%)`,
+    };
+  } else {
+    // Default: contain (pad to fit, never loses content)
+    strategy = {
+      targetWidth: plan.snappedWidth,
+      targetHeight: plan.snappedHeight,
+      resizeMode: 'contain',
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+      description: `Resize to fit ${plan.snappedWidth}×${plan.snappedHeight} with padding (ratio delta: ${plan.ratioDifference}%)`,
+    };
+  }
 
   scope.cabinet.put('strategy/plan', strategy);
-  scope.blackboard.setTaskOutput(`Strategy: ${strategy.description}`);
+  scope.blackboard.setTaskOutput(`Strategy: ${strategy.resizeMode} — ${strategy.description}`);
 
   return { status: 'success', output: strategy.description };
 }
