@@ -11,7 +11,8 @@
     "build": "npm run build -w packages/core",
     "lint": "biome check packages/",
     "format": "biome format --write packages/",
-    "validate": "npm run validate -w packages/cli"
+    "validate": "npm run validate -w packages/cli",
+    "reports": "npx tsx scripts/generate-test-reports.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
