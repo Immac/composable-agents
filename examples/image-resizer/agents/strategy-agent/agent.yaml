@@ -1,0 +1,17 @@
+id: strategy-agent
+type: code
+version: 0.1.0
+purpose: "Choose resize strategy: fill (ratio preserved), contain (pad), or cover (crop)"
+
+deterministic:
+  pre_checks:
+    - condition: "cabinet-exists(path=dimensions/plan)"
+      action: halt
+      message: "No dimension plan found — run dimension-resolver first"
+
+code:
+  entrypoint: ./index.ts
+  timeout: 5000
+
+learning:
+  channels: []

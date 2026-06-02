@@ -1,0 +1,11 @@
+id: metadata-reader
+type: code
+version: 0.1.0
+purpose: "Read image file metadata and store in cabinet for downstream agents"
+
+code:
+  entrypoint: ./index.ts
+  timeout: 10000
+
+learning:
+  channels: []

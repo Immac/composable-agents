@@ -1,0 +1,21 @@
+id: dimension-resolver
+type: code
+version: 0.1.0
+purpose: "Compute target image dimensions: minimum 1MP area, snapped to 64px, maintaining aspect ratio"
+
+code:
+  entrypoint: ./index.ts
+  timeout: 5000
+
+deterministic:
+  pre_checks:
+    - condition: "cabinet-exists(path=input/metadata)"
+      action: halt
+      message: "No input metadata found in cabinet"
+
+post_processing:
+  - condition: "has-error"
+    action: halt
+
+learning:
+  channels: []

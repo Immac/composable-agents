@@ -94,23 +94,47 @@ export class Controller {
       // Run pipeline through sequence engine
       const seqResults = await sequenceEngine.run(pipeline, scope, signal);
 
-      // Record history
+      // Record history and evaluate post-agent reflexes
       let hasFatalFailure = false;
       for (const r of seqResults) {
         history.push({ agentId: r.agentId, status: r.status, timestamp: Date.now() });
         if (r.status === 'failed' && !hasFatalFailure) {
-          // First failure determines task status
           scope.blackboard.setTaskError(r.error ?? 'Agent execution failed');
           hasFatalFailure = true;
+        }
+
+        // Post-agent reflexes — evaluate after each step
+        const postAgentActions = reflexEngine.evaluate('post-agent', r.agentId, (cond) =>
+          conditionEngine.evaluate(conditionEngine.parseExpression(cond), scope),
+        );
+        for (const action of postAgentActions) {
+          if (action.action === 'discard-output') {
+            scope.blackboard.task.output = undefined;
+            scope.cabinet.clear();
+          } else if (action.action === 'rollback') {
+            // Rollback handled by caller — mark as rejected
+            hasFatalFailure = true;
+          }
         }
       }
 
       // Post-cycle reflexes
-      if (reflexEngine.evaluate('post-cycle', '*', (cond) =>
+      let abortCycle = false;
+      const postCycleActions = reflexEngine.evaluate('post-cycle', '*', (cond) =>
         conditionEngine.evaluate(conditionEngine.parseExpression(cond), scope),
-      ).some((a) => a.action === 'abort-agent')) {
-        break;
+      );
+      for (const action of postCycleActions) {
+        if (action.action === 'abort-agent') {
+          abortCycle = true;
+        } else if (action.action === 'discard-output') {
+          scope.blackboard.task.output = undefined;
+          if (scope.blackboard.task.error) {
+            scope.blackboard.task.error = undefined;
+            scope.blackboard.task.status = 'pending';
+          }
+        }
       }
+      if (abortCycle) break;
     }
 
     return {
