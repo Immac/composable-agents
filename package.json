@@ -12,10 +12,15 @@
     "lint": "biome check packages/",
     "format": "biome format --write packages/",
     "validate": "npm run validate -w packages/cli",
-    "reports": "npx tsx scripts/generate-test-reports.ts"
+    "reports": "npx tsx scripts/serve-reports.ts",
+    "reports:gen": "npx tsx scripts/generate-test-reports.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
     "typescript": "^5.5.0"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.0.4",
+    "hono": "^4.12.23"
   }
 }
