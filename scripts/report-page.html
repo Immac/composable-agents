@@ -259,7 +259,7 @@ function renderSidebar() {
       else if (t.result === 'fail') icon = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3"><path d="M6 18L18 6M6 6l12 12"/></svg>';
       else icon = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>';
       const isExpectedFail = t.name.toLowerCase().includes('rejected') || t.name.toLowerCase().includes('empty');
-      return '<button class="test-entry' + (isExpectedFail ? ' expected-fail' : '') + '" onclick="showTest(' + JSON.stringify(r.id) + ',' + JSON.stringify(t.id) + ')" data-project="' + esc(r.id) + '" data-test="' + esc(t.id) + '" data-filter-text="' + esc((t.id + ' ' + t.name).toLowerCase()) + '">' +
+      return '<button class="test-entry' + (isExpectedFail ? ' expected-fail' : '') + '" onclick="showTest(' + "'" + esc(r.id) + "'" + ',' + "'" + esc(t.id) + "'" + ')" data-project="' + esc(r.id) + '" data-test="' + esc(t.id) + '" data-filter-text="' + esc((t.id + ' ' + t.name).toLowerCase()) + '">' +
         '<span class="icon">' + icon + '</span>' +
         '<span class="tc">' + esc(t.id) + '</span>' +
         '<span class="name">' + esc(t.name) + '</span>' +
@@ -274,7 +274,7 @@ function renderSidebar() {
       '</button>' +
       '<div class="tests-panel hidden">' +
         (testsHtml || '<div style="padding:0.25rem 0.625rem;font-size:0.75rem;color:var(--text-muted);">Benchmark / visual report</div>') +
-        '<button class="report-link" onclick="showReport(' + JSON.stringify(r.id) + ')">' +
+        '<button class="report-link" onclick="showReport(' + "'" + esc(r.id) + "'" + ')">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>' +
           '<span>Full Report</span>' +
         '</button>' +
@@ -368,13 +368,6 @@ async function showReport(id) {
   document.querySelectorAll('.project-header').forEach(h => h.classList.remove('active'));
   const activeProj = document.querySelector('[data-project="' + id + '"] .project-header');
   if (activeProj) activeProj.classList.add('active');
-  const parent = activeProj?.closest('.project');
-  if (parent) {
-    const panel = parent.querySelector('.tests-panel');
-    const chevron = parent.querySelector('.chevron');
-    if (panel) panel.classList.remove('hidden');
-    if (chevron) chevron.classList.add('open');
-  }
 }
 
 async function showTest(projectId, testId) {
