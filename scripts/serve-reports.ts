@@ -10,8 +10,8 @@
 
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { resolve, join, relative } from 'node:path';
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
+import { resolve, join, relative, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = resolve(fileURLToPath(import.meta.url), '..');
@@ -130,6 +130,27 @@ app.get('/api/reports/:id', (c) => {
   return c.json({ meta, content, variant });
 });
 
+// Serve static assets (benchmark reports, images, etc.)
+app.get('/output/*', (c) => {
+  const filePath = resolve(ROOT, c.req.path.slice(1)); // strip leading /
+  if (!existsSync(filePath) || statSync(filePath).isDirectory()) return c.notFound();
+  const ext = extname(filePath);
+  const mime: Record<string, string> = {
+    '.html': 'text/html; charset=utf-8',
+    '.js': 'application/javascript; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.svg': 'image/svg+xml',
+    '.json': 'application/json',
+    '.woff2': 'font/woff2',
+  };
+  const contentType = mime[ext] ?? 'application/octet-stream';
+  const content = readFileSync(filePath);
+  return c.newResponse(content, 200, { 'Content-Type': contentType });
+});
+
 // Serve the frontend
 app.get('/', (c) => {
   return c.html(`<!DOCTYPE html>
@@ -158,6 +179,22 @@ app.get('/', (c) => {
   .report hr { @apply my-8 border-gray-200; }
   .report strong { @apply text-gray-900; }
   .report iframe { @apply rounded-xl border-0 w-full; min-height: 80vh; }
+
+  /* Sidebar scrollbar */
+  #sidebar::-webkit-scrollbar { width: 6px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+  #sidebar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+  .dark #sidebar::-webkit-scrollbar-thumb { background: #4b5563; }
+  .dark #sidebar::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+
+
+
+  /* Active project indicator */
+  .project-header.active-project {
+    @apply bg-gray-100 dark:bg-gray-800;
+    box-shadow: inset 3px 0 0 #3b82f6;
+  }
 
   @media (prefers-color-scheme: dark) {
     .report h1 { @apply border-gray-700; }
@@ -190,7 +227,7 @@ app.get('/', (c) => {
         <h2 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Select a project</h2>
         <p class="text-sm max-w-sm text-center">Choose a project from the sidebar to view test reports and results.</p>
       </div>
-      <div id="content" class="hidden p-8 max-w-4xl mx-auto report"></div>
+      <div id="content" class="hidden p-8 max-w-6xl mx-auto report"></div>
     </main>
   </div>
 
@@ -222,7 +259,7 @@ function renderSidebar() {
 
   nav.innerHTML = reports.map((r, i) => {
     const summary = r.totalCount > 0
-      ? \`<span class="text-xs \${r.passCount === r.totalCount ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}">\${r.passCount}/\${r.totalCount} pass</span>\`
+      ? \`<span class="project-summary text-xs \${r.passCount === r.totalCount ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}">\${r.passCount}/\${r.totalCount} pass</span>\`
       : '';
 
     const testsHtml = r.tests.map(t => {
@@ -231,7 +268,7 @@ function renderSidebar() {
         : t.result === 'fail' ? 'text-red-500'
         : 'text-gray-400';
       return \`<button onclick="showTest('\${r.id}','\${t.id}')"
-        class="test-entry w-full flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+        class="test-entry w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors text-left"
         data-project="\${r.id}" data-test="\${t.id}">
         <span class="\${cls} font-bold w-4 text-center shrink-0">\${icon}</span>
         <span class="text-blue-600 dark:text-blue-400 font-mono text-xs w-16 shrink-0">\${t.id}</span>
@@ -259,12 +296,20 @@ function renderSidebar() {
     </div>\`;
   }).join('');
 
-  // Open first project
-  const first = nav.querySelector('.project');
-  if (first) {
-    const btn = first.querySelector('.project-header');
+  // Open first project that HAS tests (skip benchmarks with 0 tests)
+  const candidates = nav.querySelectorAll('.project');
+  let target = null;
+  for (const c of candidates) {
+    const summary = c.querySelector('.project-summary');
+    if (summary && summary.textContent.trim() !== '(' && summary.textContent.trim() !== '') {
+      target = c; break;
+    }
+  }
+  target = target || candidates[0];
+  if (target) {
+    const btn = target.querySelector('.project-header');
     if (btn) btn.click();
-    const id = first.getAttribute('data-project');
+    const id = target.getAttribute('data-project');
     if (id) showReport(id);
   }
 }
@@ -305,22 +350,31 @@ async function showReport(id) {
   }
 
   // Highlight active project in sidebar
-  document.querySelectorAll('.project-header').forEach(h => h.classList.remove('bg-gray-100','dark:bg-gray-800'));
+  document.querySelectorAll('.project-header').forEach(h => h.classList.remove('bg-gray-100','dark:bg-gray-800','active-project'));
   const activeProj = document.querySelector(\`[data-project="\${id}"] .project-header\`);
-  if (activeProj) activeProj.classList.add('bg-gray-100','dark:bg-gray-800');
+  if (activeProj) activeProj.classList.add('bg-gray-100','dark:bg-gray-800','active-project');
+
+  // Ensure the parent project is open
+  const parent = activeProj?.closest('.project');
+  if (parent) {
+    const panel = parent.querySelector('.tests-panel');
+    const chevron = parent.querySelector('.chevron');
+    if (panel) panel.classList.remove('hidden');
+    if (chevron) chevron.style.transform = 'rotate(90deg)';
+  }
 
   // Clear test highlights
-  document.querySelectorAll('.test-entry').forEach(e => e.classList.remove('bg-blue-50','dark:bg-blue-900/20','text-blue-700','dark:text-blue-300'));
+  document.querySelectorAll('.test-entry').forEach(e => e.classList.remove('bg-blue-100','dark:bg-blue-900','text-blue-700','dark:text-blue-300'));
 }
 
 async function showTest(projectId, testId) {
   await showReport(projectId);
   document.querySelectorAll('.test-entry').forEach(e => {
-    e.classList.remove('bg-blue-50','dark:bg-blue-900/20','text-blue-700','dark:text-blue-300');
+    e.classList.remove('bg-blue-100','dark:bg-blue-900','text-blue-700','dark:text-blue-300');
   });
   const entry = document.querySelector(\`[data-project="\${projectId}"][data-test="\${testId}"]\`);
   if (entry) {
-    entry.classList.add('bg-blue-50','dark:bg-blue-900/20','text-blue-700','dark:text-blue-300');
+    entry.classList.add('bg-blue-100','dark:bg-blue-900','text-blue-700','dark:text-blue-300');
     entry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
   // Scroll to test section in report
