@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://composable-agents.dev/schemas/agent-v1.json",
+  "title": "Composable Agent Declaration",
+  "description": "Schema for agent.yaml files in the Composable Agents framework",
+  "type": "object",
+  "required": ["id", "type", "purpose", "learning"],
+  "properties": {
+    "id": { "type": "string", "description": "Unique agent identifier (kebab-case)" },
+    "type": { "type": "string", "enum": ["llm", "code", "composite"], "description": "Agent type" },
+    "version": { "type": "string", "description": "Semver version" },
+    "purpose": { "type": "string", "description": "One-line description" },
+    "deterministic": {
+      "type": "object",
+      "properties": {
+        "pre_checks": { "type": "array", "items": { "$ref": "#/definitions/DeterministicCheck" } },
+        "post_processing": { "type": "array", "items": { "$ref": "#/definitions/DeterministicCheck" } }
+      }
+    },
+    "llm": {
+      "type": "object",
+      "properties": {
+        "prompt_template": { "type": "string" },
+        "model": { "type": "string" },
+        "temperature": { "type": "number", "minimum": 0, "maximum": 2 }
+      },
+      "required": ["prompt_template"]
+    },
+    "code": {
+      "type": "object",
+      "properties": {
+        "entrypoint": { "type": "string" },
+        "timeout": { "type": "integer", "minimum": 1000 }
+      },
+      "required": ["entrypoint"]
+    },
+    "pipeline": { "type": "array" },
+    "communication": {
+      "type": "object",
+      "properties": {
+        "consumes": { "type": "array", "items": { "type": "object" } },
+        "produces": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "learning": {
+      "type": "object",
+      "required": ["channels"],
+      "properties": {
+        "channels": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/LearningChannel" }
+        }
+      }
+    },
+    "visibility": {
+      "type": "object",
+      "properties": {
+        "expose": { "$ref": "#/definitions/VisibilityExpose" }
+      }
+    }
+  },
+  "definitions": {
+    "DeterministicCheck": {
+      "type": "object",
+      "required": ["condition", "action"],
+      "properties": {
+        "condition": { "type": "string" },
+        "action": { "type": "string", "enum": ["skip", "halt", "retry", "warn", "block"] },
+        "message": { "type": "string" }
+      }
+    },
+    "LearningChannel": {
+      "type": "object",
+      "required": ["type", "handler"],
+      "properties": {
+        "type": { "type": "string" },
+        "handler": { "type": "string", "enum": ["apply-immediately", "stage-for-review", "append-to-suggestions", "log"] }
+      }
+    },
+    "VisibilityExpose": {
+      "type": "object",
+      "properties": {
+        "cabinet": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": { "type": "string" },
+              "as": { "type": "string" }
+            }
+          }
+        },
+        "blackboard": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": { "type": "string" },
+              "as": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
