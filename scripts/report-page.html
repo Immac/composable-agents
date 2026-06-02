@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Composable Agents — Test Reports</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0;
+    --text: #0f172a; --text-secondary: #475569; --text-muted: #94a3b8;
+    --accent: #2563eb; --accent-light: #eff6ff;
+    --pass: #16a34a; --pass-bg: #f0fdf4; --pass-border: #bbf7d0;
+    --fail: #dc2626; --fail-bg: #fef2f2; --fail-border: #fecaca;
+    --warn: #d97706; --warn-bg: #fffbeb; --warn-border: #fde68a;
+    --info: #64748b; --info-bg: #f1f5f9; --info-border: #e2e8f0;
+    --sidebar-w: 20rem;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a; --surface: #1e293b; --border: #334155;
+      --text: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+      --accent: #60a5fa; --accent-light: #1e3a5f;
+      --pass: #4ade80; --pass-bg: #052e16; --pass-border: #166534;
+      --fail: #f87171; --fail-bg: #450a0a; --fail-border: #991b1b;
+      --warn: #fbbf24; --warn-bg: #451a03; --warn-border: #92400e;
+      --info: #94a3b8; --info-bg: #1e293b; --info-border: #334155;
+    }
+  }
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  /* ── Layout ─────────────────────────────── */
+  .layout { display: flex; height: 100vh; }
+  .sidebar {
+    width: var(--sidebar-w); min-width: var(--sidebar-w);
+    background: var(--surface); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+  }
+  .sidebar-header {
+    padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+  }
+  .sidebar-title {
+    font-size: 0.6875rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .sidebar-title svg { width: 14px; height: 14px; color: var(--accent); }
+  .filter-input {
+    width: 100%; padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 0.375rem; font-size: 0.8125rem; font-family: var(--font-sans);
+    color: var(--text); outline: none; transition: border-color 0.15s;
+  }
+  .filter-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .filter-input::placeholder { color: var(--text-muted); }
+  .filter-wrap { position: relative; }
+  .filter-wrap svg {
+    position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%);
+    width: 14px; height: 14px; color: var(--text-muted);
+  }
+  .sidebar-nav { flex: 1; overflow-y: auto; }
+  .sidebar-nav::-webkit-scrollbar { width: 5px; }
+  .sidebar-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── Project ────────────────────────────── */
+  .project { border-bottom: 1px solid var(--border); }
+  .project-header {
+    width: 100%; display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.625rem 1rem; font-size: 0.8125rem; font-weight: 600;
+    color: var(--text); text-align: left; border: 0; background: transparent;
+    cursor: pointer; transition: background 0.1s;
+    font-family: var(--font-sans);
+  }
+  .project-header:hover { background: var(--bg); }
+  .project-header.active { background: var(--accent-light); box-shadow: inset 3px 0 0 var(--accent); }
+  .chevron { width: 12px; height: 12px; color: var(--text-muted); transition: transform 0.15s; flex-shrink: 0; }
+  .chevron.open { transform: rotate(90deg); }
+  .project-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ── Badge ──────────────────────────────── */
+  .badge {
+    display: inline-flex; align-items: center; padding: 0.125rem 0.5rem;
+    border-radius: 9999px; font-size: 0.6875rem; font-weight: 600; flex-shrink: 0;
+  }
+  .badge-pass { background: var(--pass-bg); color: var(--pass); border: 1px solid var(--pass-border); }
+  .badge-fail { background: var(--fail-bg); color: var(--fail); border: 1px solid var(--fail-border); }
+  .badge-info { background: var(--info-bg); color: var(--info); border: 1px solid var(--info-border); }
+
+  /* ── Test entry ─────────────────────────── */
+  .tests-panel { padding: 0 0.75rem 0.5rem 2rem; }
+  .test-entry {
+    width: 100%; display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.375rem 0.625rem; font-size: 0.8125rem; border-radius: 0.375rem;
+    border: 0; background: transparent; cursor: pointer; text-align: left;
+    font-family: var(--font-sans); color: var(--text-secondary);
+    transition: background 0.1s, transform 0.1s;
+  }
+  .test-entry:hover { background: var(--bg); transform: translateX(2px); }
+  .test-entry .icon { width: 16px; height: 16px; flex-shrink: 0; }
+  .test-entry .tc { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--accent); width: 3.25rem; flex-shrink: 0; }
+  .test-entry .name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .test-entry .time {
+    font-family: var(--font-mono); font-size: 0.6875rem; color: var(--text-muted);
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .test-entry:hover .time { opacity: 1; }
+  .test-entry.expected-fail .name { color: var(--warn); }
+  .report-link {
+    width: 100%; text-align: left; padding: 0.375rem 0.625rem;
+    font-size: 0.8125rem; color: var(--accent); border: 0; background: transparent;
+    border-radius: 0.375rem; cursor: pointer; display: flex; align-items: center;
+    gap: 0.5rem; margin-top: 0.25rem; font-family: var(--font-sans);
+  }
+  .report-link:hover { background: var(--accent-light); }
+  .report-link svg { width: 14px; height: 14px; }
+
+  /* ── Main content ───────────────────────── */
+  .main { flex: 1; overflow-y: auto; background: var(--bg); }
+  .welcome {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100%; color: var(--text-muted);
+  }
+  .welcome-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 1rem; padding: 3rem; text-align: center;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  }
+  .content { padding: 2rem; max-width: 60rem; margin: 0 auto; }
+  .hidden { display: none !important; }
+
+  /* ── Report content ─────────────────────── */
+  .report h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text); }
+  .report h2 {
+    font-size: 1.125rem; font-weight: 600; margin: 2rem 0 0.75rem;
+    padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); color: var(--text);
+  }
+  .report h3 { font-size: 1rem; font-weight: 600; margin: 1.5rem 0 0.5rem; color: var(--accent); }
+  .report p { margin: 0.5rem 0; line-height: 1.6; color: var(--text-secondary); font-size: 0.9375rem; }
+  .report strong { color: var(--text); font-weight: 600; }
+  .report hr { margin: 2rem 0; border: 0; border-top: 1px solid var(--border); }
+  .report code { font-family: var(--font-mono); font-size: 0.8125rem; }
+  .report p code { background: var(--bg); padding: 0.125rem 0.375rem; border-radius: 0.25rem; border: 1px solid var(--border); }
+  .report pre { background: var(--bg); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; margin: 0.75rem 0; overflow-x: auto; }
+  .report blockquote { border-left: 3px solid var(--accent); padding-left: 1rem; color: var(--text-muted); margin: 1rem 0; font-style: italic; }
+  .report ul, .report ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+  .report li { margin: 0.25rem 0; color: var(--text-secondary); }
+  .report iframe { border: 1px solid var(--border); border-radius: 0.75rem; width: 100%; min-height: 80vh; }
+
+  /* ── Table ──────────────────────────────── */
+  .report table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.875rem; }
+  .report thead { background: var(--bg); }
+  .report th {
+    font-weight: 600; text-align: left; padding: 0.625rem 1rem;
+    border-bottom: 2px solid var(--border); color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .report td { padding: 0.625rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+  .report tbody tr:hover { background: var(--bg); }
+  .report tbody tr:last-child td { border-bottom: 0; }
+  /* Column widths for test summary table */
+  .report table th:nth-child(1), .report table td:nth-child(1) { width: 6rem; }
+  .report table th:nth-child(3), .report table td:nth-child(3) { width: 8rem; }
+  .report table th:nth-child(4), .report table td:nth-child(4) { width: 4rem; text-align: right; }
+  .report table td:nth-child(4) { text-align: right; font-family: var(--font-mono); font-size: 0.8125rem; }
+
+  /* ── Breadcrumb ─────────────────────────── */
+  .breadcrumb { display: flex; align-items: center; gap: 0.375rem; font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+  .breadcrumb svg { width: 12px; height: 12px; }
+  .breadcrumb .current { color: var(--text-secondary); font-weight: 500; }
+
+  /* ── Summary badges ─────────────────────── */
+  .summary-bar {
+    display: flex; align-items: center; gap: 0.75rem; margin: 0.75rem 0 1.5rem;
+    padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 0.5rem; font-size: 0.875rem;
+  }
+  .summary-bar .metric { display: flex; align-items: center; gap: 0.375rem; }
+  .summary-bar .metric-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .summary-bar .metric-dot.pass { background: var(--pass); }
+  .summary-bar .metric-dot.fail { background: var(--fail); }
+  .summary-bar .metric-dot.warn { background: var(--warn); }
+  .summary-bar .metric-value { font-weight: 700; color: var(--text); }
+  .summary-bar .metric-label { color: var(--text-muted); }
+  .summary-bar .separator { width: 1px; height: 1.25rem; background: var(--border); }
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <header class="sidebar-header">
+      <div class="sidebar-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Test Reports
+      </div>
+      <div class="filter-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input id="test-filter" class="filter-input" type="text" placeholder="Filter tests..." oninput="filterTests(this.value)"/>
+      </div>
+    </header>
+    <nav id="sidebar" class="sidebar-nav">
+      <div style="padding:1rem;text-align:center;font-size:0.8125rem;color:var(--text-muted);">Loading...</div>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div id="welcome" class="welcome">
+      <div class="welcome-card">
+        <div style="font-size:3rem;margin-bottom:1rem;">🧪</div>
+        <h2 style="font-size:1.25rem;font-weight:600;color:var(--text);margin-bottom:0.5rem;">Select a project</h2>
+        <p style="font-size:0.875rem;max-width:20rem;color:var(--text-muted);">Choose a project from the sidebar to view test reports and results.</p>
+      </div>
+    </div>
+    <div id="content" class="content hidden"></div>
+  </main>
+</div>
+
+<script>
+const API = '/api/reports';
+let reports = [];
+
+async function loadReports() {
+  try {
+    const res = await fetch(API);
+    reports = await res.json();
+    renderSidebar();
+  } catch (e) {
+    document.querySelector('#sidebar').innerHTML =
+      '<div style="padding:1rem;text-align:center;font-size:0.8125rem;color:var(--fail);">Failed to load reports</div>';
+  }
+}
+
+function renderSidebar() {
+  const nav = document.querySelector('#sidebar');
+  if (!reports.length) {
+    nav.innerHTML = '<div style="padding:1rem;text-align:center;font-size:0.8125rem;color:var(--text-muted);">No reports found</div>';
+    return;
+  }
+  nav.innerHTML = reports.map((r, i) => {
+    let badge = '';
+    if (r.totalCount > 0) {
+      const cls = r.passCount === r.totalCount ? 'pass' : r.passCount === 0 ? 'fail' : 'info';
+      badge = '<span class="badge badge-' + cls + '">' + r.passCount + '/' + r.totalCount + '</span>';
+    }
+    const testsHtml = r.tests.map(t => {
+      let icon = '';
+      if (t.result === 'pass') icon = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>';
+      else if (t.result === 'fail') icon = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3"><path d="M6 18L18 6M6 6l12 12"/></svg>';
+      else icon = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>';
+      const isExpectedFail = t.name.toLowerCase().includes('rejected') || t.name.toLowerCase().includes('empty');
+      return '<button class="test-entry' + (isExpectedFail ? ' expected-fail' : '') + '" onclick="showTest(' + JSON.stringify(r.id) + ',' + JSON.stringify(t.id) + ')" data-project="' + esc(r.id) + '" data-test="' + esc(t.id) + '" data-filter-text="' + esc((t.id + ' ' + t.name).toLowerCase()) + '">' +
+        '<span class="icon">' + icon + '</span>' +
+        '<span class="tc">' + esc(t.id) + '</span>' +
+        '<span class="name">' + esc(t.name) + '</span>' +
+        '<span class="time">' + esc(t.time) + '</span>' +
+      '</button>';
+    }).join('');
+    return '<div class="project" data-project="' + esc(r.id) + '">' +
+      '<button class="project-header" onclick="toggle(' + i + ')">' +
+        '<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>' +
+        '<span class="project-name">' + esc(r.project) + '</span>' +
+        badge +
+      '</button>' +
+      '<div class="tests-panel hidden">' +
+        (testsHtml || '<div style="padding:0.25rem 0.625rem;font-size:0.75rem;color:var(--text-muted);">Benchmark / visual report</div>') +
+        '<button class="report-link" onclick="showReport(' + JSON.stringify(r.id) + ')">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>' +
+          '<span>Full Report</span>' +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  // Auto-open first project with tests
+  const candidates = nav.querySelectorAll('.project');
+  let target = null;
+  for (const c of candidates) { if (c.querySelector('.badge')) { target = c; break; } }
+  target = target || candidates[0];
+  if (target) {
+    const btn = target.querySelector('.project-header');
+    if (btn) btn.click();
+    showReport(target.getAttribute('data-project'));
+  }
+}
+
+function toggle(i) {
+  const proj = document.querySelectorAll('.project')[i];
+  if (!proj) return;
+  const panel = proj.querySelector('.tests-panel');
+  const chevron = proj.querySelector('.chevron');
+  const isOpen = !panel.classList.contains('hidden');
+  panel.classList.toggle('hidden');
+  chevron.classList.toggle('open', !isOpen);
+}
+
+function filterTests(q) {
+  const term = q.toLowerCase().trim();
+  document.querySelectorAll('.test-entry').forEach(e => {
+    const text = e.getAttribute('data-filter-text') || '';
+    e.style.display = (!term || text.includes(term)) ? '' : 'none';
+  });
+  document.querySelectorAll('.project').forEach(p => {
+    const visible = p.querySelectorAll('.test-entry:not([style*="display: none"])');
+    const panel = p.querySelector('.tests-panel');
+    const chevron = p.querySelector('.chevron');
+    if (term && visible.length > 0 && panel.classList.contains('hidden')) {
+      panel.classList.remove('hidden');
+      chevron.classList.add('open');
+    }
+  });
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+async function showReport(id) {
+  document.querySelector('#welcome').classList.add('hidden');
+  const content = document.querySelector('#content');
+  content.classList.remove('hidden');
+  content.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;padding:5rem 0;color:var(--text-muted);">Loading...</div>';
+
+  try {
+    const res = await fetch('/api/reports/' + encodeURIComponent(id));
+    const data = await res.json();
+
+    if (data.variant === 'iframe') {
+      content.innerHTML = '<iframe src="../output/benchmark/report/index.html"></iframe>';
+    } else if (data.variant === 'markdown' && data.content) {
+      const meta = data.meta;
+      // Breadcrumb
+      let html = '<div class="breadcrumb"><span>Test Reports</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg><span class="current">' + esc(meta.project) + '</span></div>';
+      // Title
+      html += '<h1>' + esc(meta.title) + '</h1>';
+      // Summary bar
+      if (meta.totalCount > 0) {
+        html += '<div class="summary-bar">';
+        html += '<div class="metric"><span class="metric-dot pass"></span><span class="metric-value">' + meta.passCount + '</span><span class="metric-label">passed</span></div>';
+        html += '<div class="separator"></div>';
+        html += '<div class="metric"><span class="metric-value">' + meta.totalCount + '</span><span class="metric-label">total</span></div>';
+        html += '<div class="separator"></div>';
+        const duration = meta.tests.reduce((sum, t) => sum + parseInt(t.time) || 0, 0);
+        html += '<div class="metric"><span class="metric-value">' + duration + 's</span><span class="metric-label">duration</span></div>';
+        html += '</div>';
+      }
+      // Render markdown
+      // Strip first H1 from markdown (we render our own title)
+      const md = data.content.replace(/^#\s+.+\n+/, '');
+      html += '<div class="report">' + marked.parse(md) + '</div>';
+      content.innerHTML = html;
+    } else {
+      content.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--fail);">Report content not found</div>';
+    }
+  } catch (e) {
+    content.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--fail);">Failed to load report</div>';
+  }
+
+  // Highlight active project
+  document.querySelectorAll('.project-header').forEach(h => h.classList.remove('active'));
+  const activeProj = document.querySelector('[data-project="' + id + '"] .project-header');
+  if (activeProj) activeProj.classList.add('active');
+  const parent = activeProj?.closest('.project');
+  if (parent) {
+    const panel = parent.querySelector('.tests-panel');
+    const chevron = parent.querySelector('.chevron');
+    if (panel) panel.classList.remove('hidden');
+    if (chevron) chevron.classList.add('open');
+  }
+}
+
+async function showTest(projectId, testId) {
+  await showReport(projectId);
+  document.querySelectorAll('.test-entry').forEach(e => e.style.background = '');
+  const entry = document.querySelector('[data-project="' + projectId + '"][data-test="' + testId + '"]');
+  if (entry) {
+    entry.style.background = 'var(--accent-light)';
+    entry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  const anchor = document.getElementById(testId.toLowerCase());
+  if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+document.addEventListener('DOMContentLoaded', loadReports);
+</script>
+</body>
+</html>
