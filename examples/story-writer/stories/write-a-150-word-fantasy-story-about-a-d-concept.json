@@ -1,0 +1,54 @@
+{
+  "title": "The Cloud Hoarder",
+  "genre": "fantasy",
+  "tone": "whimsical",
+  "voice": "third-person-omniscient",
+  "setting": {
+    "time": "timeless, in an age when dragons still shaped the sky",
+    "place": "the Stormspire Peaks, where mountains scrape the bellies of clouds",
+    "mood": "dreamy and warm, with the soft hum of wind through scales"
+  },
+  "characters": [
+    {
+      "name": "Veyra",
+      "role": "protagonist",
+      "motivation": "to preserve the beauty of the sky before mortals forget how to look up",
+      "arc": "from solitary collector to generous guardian who learns that clouds are meant to be released"
+    },
+    {
+      "name": "Pip",
+      "role": "catalyst",
+      "motivation": "to find the rain cloud that once raised him from an orphaned hatchling",
+      "arc": "from desperate searcher to someone who understands that letting go is its own kind of love"
+    }
+  ],
+  "acts": [
+    {
+      "name": "The Hoard",
+      "summary": "Veyra's mountain lair is filled with bottled clouds — cumulus, nimbus, wisps of fog — each labeled and shelved like rare jewels.",
+      "scenes": [
+        "Veyra arranges her newest acquisition: a perfect sunset-pink altocumulus, cradled in amber glass.",
+        "Pip arrives at the Stormspire, desperate, begging Veyra for a specific storm cloud she captured decades ago."
+      ]
+    },
+    {
+      "name": "The Storm",
+      "summary": "Veyra refuses, but Pip's plea stirs something — a memory of why she began collecting in the first place.",
+      "scenes": [
+        "A flashback reveals young Veyra watching her first sunset cloud dissolve, heartbroken by its impermanence.",
+        "Pip argues that clouds lose their magic when locked away; they are alive only when free.",
+        "Veyra clutches her favorite cloud — a tiny thunderhead — and feels its faint, sad pulse."
+      ]
+    },
+    {
+      "name": "The Release",
+      "summary": "Veyra opens every jar. The sky erupts with color and rain and wonder.",
+      "scenes": [
+        "She uncorks the amber jar; the sunset cloud unfurls across the evening sky, breathtaking.",
+        "One by one, clouds pour out — the mountain's caverns fill with wind and mist and roaring joy.",
+        "Pip finds his rain cloud among the released, recognizes its gentle rumble, and weeps.",
+        "Veyra watches the empty jars and smiles, realizing she never needed to own beauty — only witness it."
+      ]
+    }
+  ]
+}
