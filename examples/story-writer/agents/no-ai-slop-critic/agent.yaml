@@ -1,0 +1,11 @@
+id: no-ai-slop-critic
+type: llm
+version: 0.1.0
+purpose: "Detect and flag AI writing patterns in prose — the anti-slop critic"
+
+llm:
+  temperature: 0.1
+  max_tokens: 2048
+
+learning:
+  channels: []

@@ -1,0 +1,63 @@
+{
+  "title": "The Cow Who Feared the Sun-Kissed Peel",
+  "genre": "fantasy",
+  "tone": "humorous",
+  "voice": "third-person-omniscient",
+  "setting": {
+    "time": "A timeless pastoral morning that stretches into twilight",
+    "place": "Meadowbrook Farm — a patchwork of emerald fields where the grass is greener, the sky bluer, and the cows are, well, blue",
+    "mood": "whimsical and warm, with an undercurrent of gentle absurdity"
+  },
+  "characters": [
+    {
+      "name": "Azure",
+      "role": "protagonist — a bright blue cow with an irrational phobia",
+      "motivation": "To survive another day without encountering a single piece of yellow fruit, and eventually to understand why such a small thing holds so much power over her",
+      "arc": "From paralyzed avoidance to courageous curiosity, learning that the things we fear most often hold the sweetest surprises"
+    },
+    {
+      "name": "Bartlett",
+      "role": "mentor-figure — a weathered old pear tree at the edge of the orchard",
+      "motivation": "To gently coax Azure past her fear by offering perspective only a rooted, patient being can",
+      "arc": "Revealed in the climax to have once feared the color blue himself — a fallen sky — proving that even the grounded must eventually face the open air"
+    },
+    {
+      "name": "Sunny",
+      "role": "comic foil — a cheerful yellow canary who teases Azure relentlessly",
+      "motivation": "To befriend Azure, partly out of genuine affection and partly because the farm is terribly boring without someone to chase",
+      "arc": "Shifts from thoughtless teasing to real empathy when Azure's fear nearly costs them both"
+    }
+  ],
+  "acts": [
+    {
+      "name": "The Morning Routine",
+      "summary": "We meet Azure on an ordinary day and learn the elaborate lengths she goes to in order to avoid yellow fruit — which is difficult, because the orchard is full of lemons, bananas, and golden pears.",
+      "scenes": [
+        "Azure wakes in the barn, blue coat shimmering, and maps her route to the pasture — three lefts, a right, and a wide berth around the orchard — a path she has walked every day since the Incident.",
+        "A flashback reveals the Incident: a single banana fell from a truck as a calf, landing inches from her hoof with a sound like a thunderclap. She has never forgotten it.",
+        "Sunny the canary lands on Azure's back and chatters about how the farmer brought in crates of mangoes, lemons, and golden apples — Azure's ears flatten and she quickens her pace.",
+        "At the pasture, Azure discovers a crate of lemons has been placed at the only entrance. She stands frozen, trembling, while the other (normal-colored) cows browse unbothered nearby."
+      ]
+    },
+    {
+      "name": "The Orchard's Invitation",
+      "summary": "Azure's avoidance becomes unsustainable as the farm prepares for the Harvest Festival, which demands every animal's participation — including a walk through the orchard.",
+      "scenes": [
+        "The farmer announces the Harvest Festival; Sunny tells Azure the path runs directly through the fruit grove. Azure considers skipping the festival entirely — but it is the only day the farmer brings out fresh clover cake.",
+        "Desperate, Azure seeks out Bartlett, the ancient pear tree at the orchard's edge, rumored to be wise. She asks him how to go around the orchard without going around the orchard.",
+        "Bartlett does not answer directly. Instead he tells her a story about a time he feared the open sky — the vast, limitless blue — and how he only grew taller once he stopped flinching from it. Azure realizes, uncomfortably, that she is the very thing he feared.",
+        "That night, Azure stands at the orchard's threshold under moonlight. A lemon tree glows pale yellow in the silver light. For the first time, she notices it is actually rather beautiful."
+      ]
+    },
+    {
+      "name": "Through the Grove",
+      "summary": "Azure confronts her fear step by step, and discovers the fruit is not the monster she imagined — but the real test comes when her courage must protect someone else.",
+      "scenes": [
+        "Morning of the festival. Azure enters the orchard with Bartlett's words echoing. Each step past a yellow fruit is a small victory; she breathes, counts her hoofbeats, and keeps moving.",
+        "Halfway through, Sunny darting ahead gets tangled in a lemon branch and dangles helplessly above a pile of overripe mangoes. Sunny's panicked chirps snap Azure out of her own fear — something smaller needs her now.",
+        "Azure walks deliberately into the fruit grove, pushes through the rustling yellow leaves, and lowers her broad blue head so Sunny can climb aboard. The mangoes squish beneath her hooves — wet, fragrant, absurd — and she realizes the sound is nothing like a thunderclap. It is soft. It is silly. It smells like sugar.",
+        "They emerge from the orchard together. Azure's coat is streaked with mango pulp and lemon juice. She is still blue, still trembling slightly, but walking forward. Sunny nuzzles her ear and, for once, says nothing at all."
+      ]
+    }
+  ]
+}

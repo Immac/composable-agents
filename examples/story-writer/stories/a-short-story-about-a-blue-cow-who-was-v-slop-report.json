@@ -1,0 +1,28 @@
+{
+  "score": 87,
+  "verdict": "approved",
+  "issues": [
+    {
+      "rule": "Observation: 'like' simile density",
+      "severity": "P2",
+      "count": 14,
+      "examples": [
+        "like a lake at dawn",
+        "like small captured suns",
+        "like sleeping infants",
+        "like a brass bell",
+        "like a word in a language she could not quite speak",
+        "like sap, like honey dripping from a comb on a warm day",
+        "like a pear waiting to fall",
+        "like old bones settling",
+        "like stones in a creek",
+        "like ornaments",
+        "like a lullaby",
+        "like a curtain",
+        "like a revelation of cosmic significance",
+        "like a door in her barn that led somewhere other than the barn"
+      ]
+    }
+  ],
+  "summary": "All P0 and P1 violations eliminated. Em dashes dropped from 27 to zero. The only remaining pattern worth noting is high 'like' simile density (14 uses in ~3,500 words, roughly one every 250 words), which is not on the banned list but sits at the edge of natural prose. The text reads as strong, voice-driven fiction with earned humor and distinct character voices."
+}
