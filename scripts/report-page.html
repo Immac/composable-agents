@@ -192,6 +192,20 @@
   .summary-bar .metric-value { font-weight: 700; color: var(--text); }
   .summary-bar .metric-label { color: var(--text-muted); }
   .summary-bar .separator { width: 1px; height: 1.25rem; background: var(--border); }
+
+  /* Stories */
+  .story-card { border: 1px solid var(--border); border-radius: 0.5rem; margin: 0.75rem 0; overflow: hidden; }
+  .story-header { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; cursor: pointer; background: var(--surface); transition: background 0.1s; }
+  .story-header:hover { background: var(--bg); }
+  .story-title { font-weight: 600; color: var(--text); }
+  .story-body { padding: 0 1rem 1rem; }
+  .story-section { margin-top: 1rem; }
+  .story-section-title { font-size: 0.8125rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+  .story-meta { display: flex; gap: 1.5rem; font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 0.5rem; flex-wrap: wrap; }
+  .story-characters { display: flex; gap: 1rem; font-size: 0.8125rem; margin-top: 0.25rem; }
+  .story-text { font-size: 0.9375rem; line-height: 1.7; color: var(--text-secondary); }
+  .story-text p { margin: 0.5rem 0; }
+  .story-text h1, .story-text h2, .story-text h3 { color: var(--text); }
 </style>
 </head>
 <body>
@@ -357,6 +371,8 @@ async function showReport(id) {
       const md = data.content.replace(/^#\s+.+\n+/, '');
       html += '<div class="report">' + marked.parse(md) + '</div>';
       content.innerHTML = html;
+      // Load stories for story-writer project
+      if (meta.project === 'story-writer') loadStories(content);
     } else {
       content.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--fail);">Report content not found</div>';
     }
@@ -380,6 +396,76 @@ async function showTest(projectId, testId) {
   }
   const anchor = document.getElementById(testId.toLowerCase());
   if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function loadStories(container) {
+  try {
+    const res = await fetch('/api/stories');
+    const stories = await res.json();
+    if (!stories.length) return;
+
+    let html = '<h2 style="margin-top:2.5rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);">Generated Stories</h2>';
+    html += '<p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:1rem;">Stories produced by the 3-agent pipeline (conceptor → writer → critic).</p>';
+
+    for (const s of stories) {
+      html += '<div class="story-card">';
+      html += '<div class="story-header" onclick="toggleStory(this)">';
+      html += '<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
+      html += '<span class="story-title">' + esc(s.title) + '</span>';
+      if (s.genre) html += '<span class="badge badge-info" style="margin-left:0.5rem;">' + esc(s.genre) + '</span>';
+      html += '</div>';
+      html += '<div class="story-body hidden">';
+
+      // Load full story content
+      const storyRes = await fetch('/api/stories/' + encodeURIComponent(s.slug));
+      const story = await storyRes.json();
+
+      if (story.concept) {
+        html += '<div class="story-section">';
+        html += '<h4 class="story-section-title">Concept</h4>';
+        html += '<div class="story-meta">';
+        html += '<span><strong>Tone:</strong> ' + esc(story.concept.tone || '') + '</span>';
+        html += '<span><strong>Voice:</strong> ' + esc(story.concept.voice || '') + '</span>';
+        html += '<span><strong>Setting:</strong> ' + esc(story.concept.setting?.place || '') + '</span>';
+        html += '</div>';
+        if (story.concept.characters) {
+          html += '<div class="story-characters">';
+          for (const ch of story.concept.characters) {
+            html += '<div class="character"><strong>' + esc(ch.name) + '</strong> <span style="color:var(--text-muted);">(' + esc(ch.role) + ')</span></div>';
+          }
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+
+      if (story.final) {
+        html += '<div class="story-section">';
+        html += '<h4 class="story-section-title">Story</h4>';
+        html += '<div class="story-text">' + marked.parse(story.final) + '</div>';
+        html += '</div>';
+      }
+
+      if (story.critique) {
+        html += '<div class="story-section">';
+        html += '<h4 class="story-section-title">Critic Notes</h4>';
+        html += '<p style="color:var(--text-secondary);font-style:italic;">' + esc(story.critique) + '</p>';
+        html += '</div>';
+      }
+
+      html += '</div></div>';
+    }
+
+    container.insertAdjacentHTML('beforeend', html);
+  } catch (e) {
+    // Stories not available — silently ignore
+  }
+}
+
+function toggleStory(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.chevron');
+  body.classList.toggle('hidden');
+  chevron.classList.toggle('open');
 }
 
 document.addEventListener('DOMContentLoaded', loadReports);

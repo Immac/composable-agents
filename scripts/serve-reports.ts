@@ -122,6 +122,38 @@ app.get('/api/reports/:id', (c) => {
   return c.json({ meta, content, variant });
 });
 
+// API — list stories
+app.get('/api/stories', (c) => {
+  const storiesDir = join(ROOT, 'examples', 'story-writer', 'stories');
+  if (!existsSync(storiesDir)) return c.json([]);
+  const files = readdirSync(storiesDir);
+  const slugs = [...new Set(files.map(f => f.replace(/-(concept|draft|final|critique)\.md$/, '').replace(/-(concept|draft|final|critique)\.json$/, '')))];
+  const stories = slugs.map(slug => {
+    const concept = files.includes(slug + '-concept.json') ? JSON.parse(readFileSync(join(storiesDir, slug + '-concept.json'), 'utf-8')) : null;
+    const hasDraft = files.includes(slug + '-draft.md');
+    const hasFinal = files.includes(slug + '-final.md');
+    const hasCritique = files.includes(slug + '-critique.md');
+    return { slug, title: concept?.title || slug, genre: concept?.genre, hasDraft, hasFinal, hasCritique };
+  });
+  return c.json(stories);
+});
+
+// API — get story files
+app.get('/api/stories/:slug', (c) => {
+  const slug = c.req.param('slug');
+  const storiesDir = join(ROOT, 'examples', 'story-writer', 'stories');
+  const result: Record<string, unknown> = {};
+  for (const ext of ['concept.json', 'draft.md', 'final.md', 'critique.md']) {
+    const filePath = join(storiesDir, slug + '-' + ext);
+    if (existsSync(filePath)) {
+      const content = readFileSync(filePath, 'utf-8');
+      result[ext.replace('.json', '').replace('.md', '')] = ext.endsWith('.json') ? JSON.parse(content) : content;
+    }
+  }
+  if (Object.keys(result).length === 0) return c.json({ error: 'Story not found' }, 404);
+  return c.json(result);
+});
+
 // Serve static assets (benchmark reports, images, etc.)
 app.get('/output/*', (c) => {
   const filePath = resolve(ROOT, c.req.path.slice(1));
