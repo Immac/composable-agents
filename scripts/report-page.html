@@ -451,6 +451,12 @@ async function loadStories(container) {
         html += '<p style="color:var(--text-secondary);font-style:italic;">' + esc(story.critique) + '</p>';
         html += '</div>';
       }
+      if (story.history) {
+        html += '<div class="story-section">';
+        html += '<h4 class="story-section-title">Revision History</h4>';
+        html += '<div class="story-text" style="font-size:0.8125rem;color:var(--text-muted);">' + marked.parse(story.history) + '</div>';
+        html += '</div>';
+      }
 
       html += '</div></div>';
     }

@@ -127,7 +127,7 @@ app.get('/api/stories', (c) => {
   const storiesDir = join(ROOT, 'examples', 'story-writer', 'stories');
   if (!existsSync(storiesDir)) return c.json([]);
   const files = readdirSync(storiesDir);
-  const slugs = [...new Set(files.map(f => f.replace(/-(concept|draft|final|critique)\.md$/, '').replace(/-(concept|draft|final|critique)\.json$/, '')))];
+  const slugs = [...new Set(files.map(f => f.replace(/-(concept|draft|final|critique|history)\.md$/, '').replace(/-(concept|draft|final|critique|history)\.json$/, '')))];
   const stories = slugs.map(slug => {
     const concept = files.includes(slug + '-concept.json') ? JSON.parse(readFileSync(join(storiesDir, slug + '-concept.json'), 'utf-8')) : null;
     const hasDraft = files.includes(slug + '-draft.md');
@@ -143,7 +143,7 @@ app.get('/api/stories/:slug', (c) => {
   const slug = c.req.param('slug');
   const storiesDir = join(ROOT, 'examples', 'story-writer', 'stories');
   const result: Record<string, unknown> = {};
-  for (const ext of ['concept.json', 'draft.md', 'final.md', 'critique.md']) {
+  for (const ext of ['concept.json', 'draft.md', 'final.md', 'critique.md', 'history.md']) {
     const filePath = join(storiesDir, slug + '-' + ext);
     if (existsSync(filePath)) {
       const content = readFileSync(filePath, 'utf-8');

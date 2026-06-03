@@ -1,0 +1,44 @@
+{
+  "title": "The River Who Rushed",
+  "genre": "fable",
+  "tone": "gentle",
+  "voice": "third-person-omniscient",
+  "setting": {
+    "time": "timeless",
+    "place": "a valley between two ancient mountains",
+    "mood": "tranquil"
+  },
+  "characters": [
+    {
+      "name": "The River",
+      "role": "protagonist",
+      "motivation": "reaching the sea as fast as possible",
+      "arc": "learns that urgency destroys what patience builds"
+    },
+    {
+      "name": "The Old Stone",
+      "role": "mentor",
+      "motivation": "teaching the river wisdom through stillness",
+      "arc": "unchanged — a constant reminder"
+    }
+  ],
+  "acts": [
+    {
+      "name": "The Rushing",
+      "summary": "The River races downhill, carving away everything in its path — banks, roots, birds' nests.",
+      "scenes": [
+        "The River bursts from the mountain, roaring past wildflowers without seeing them.",
+        "A willow begs for a gentle bank, but the River tears its roots away."
+      ]
+    },
+    {
+      "name": "The Stillness",
+      "summary": "The River pauses and discovers what patience creates.",
+      "scenes": [
+        "The Old Stone says: 'Where you rush, nothing grows. Where you linger, life gathers.'",
+        "The River slows. Lily pads root. Fish return. The bank blooms.",
+        "The River arrives at the sea — wider, deeper, fuller than it ever imagined."
+      ]
+    }
+  ]
+}
