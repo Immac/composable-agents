@@ -32,6 +32,9 @@ export { reflexesAgent, reflexesAgentManifest } from './agents/reflexes/index';
 export { learningAgent, learningAgentManifest } from './agents/learning/index';
 export { memoryAgent, memoryAgentManifest } from './agents/memory/index';
 
+// Foreman Agent
+export { createForemanAgent, foremanAgentManifest } from './agents/foreman/index';
+
 // Lesson handlers
 export {
   applyImmediately,

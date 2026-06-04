@@ -1,0 +1,35 @@
+{
+  "score": 90,
+  "verdict": "approved",
+  "issues": [
+    {
+      "rule": "P2: Sentence length uniformity",
+      "severity": "P2",
+      "count": 4,
+      "examples": [
+        "Now came the work. (4 words)",
+        "Pip glowed. (2 words)",
+        "He waited. (2 words)",
+        "Once a week, when the stars were bright and the village was deep in sleep, Luna would dim herself to the softest possible glow and curl up among the clouds. (35 words)"
+      ]
+    },
+    {
+      "rule": "Uncategorized: Simile density (residual)",
+      "severity": "P2",
+      "count": 10,
+      "examples": [
+        "as though the world itself couldn't decide whether it was awake or dreaming",
+        "as though she could hold the tiredness in",
+        "as though the yawn might blow them off course",
+        "like petals at dusk",
+        "like a shred of sleep",
+        "the way a letter folds into an envelope",
+        "the way a heart is quiet when it finally feels safe",
+        "like tiny lanterns",
+        "like being held",
+        "like a sky about to reveal something wonderful"
+      ]
+    }
+  ],
+  "summary": "Clean pass. Zero P0 or P1 issues. The 17→10 simile reduction brought density from 1 per 165 words to 1 per 280 words, which is within range for genre. Remaining items are all P2, minor, and several are deliberate pacing choices for a children's bedtime story."
+}

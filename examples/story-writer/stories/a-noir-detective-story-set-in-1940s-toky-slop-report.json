@@ -1,0 +1,24 @@
+{
+  "score": 89,
+  "verdict": "approved",
+  "issues": [
+    {
+      "rule": "Rule 4: No banned verbs",
+      "severity": "P1",
+      "count": 1,
+      "examples": [
+        "the patient amusement of a cat watching a mouse navigate a maze"
+      ]
+    },
+    {
+      "rule": "Rule 10: Contrasting parallelism overuse",
+      "severity": "P1",
+      "count": 2,
+      "examples": [
+        "Not hope, exactly, but the memory of hope",
+        "Not hope, not yet, but the despair that had settled over Tokyo"
+      ]
+    }
+  ],
+  "summary": "The em dash purge was successful: zero P0 violations remain. The one banned verb ('navigate') and the 'Not hope... Not hope...' template repetition in the final two sections are the only remaining tells. Both are minor and easy to fix."
+}

@@ -1,0 +1,61 @@
+{
+  "title": "The Last Audience",
+  "genre": "sci-fi",
+  "tone": "optimistic",
+  "voice": "third-person-limited",
+  "setting": {
+    "time": "2049, the week before the Global Climate Referendum",
+    "place": "A half-submerged United Nations hall in Geneva, repurposed as a broadcast center",
+    "mood": "urgent but hopeful"
+  },
+  "characters": [
+    {
+      "name": "Amara Osei",
+      "role": "protagonist — a 16-year-old Kenyan climate activist chosen to deliver the address",
+      "motivation": "To honor her grandmother, who lost her farmland to desertification, by making the world finally listen",
+      "arc": "From self-doubting proxy speaker to the voice that redefines climate action as collective survival, not sacrifice"
+    },
+    {
+      "name": "Dr. Lena Vasik",
+      "role": "mentor — the veteran diplomat who handpicked Amara and wrote the original speech draft",
+      "motivation": "To pass the torch before her failing health forces retirement",
+      "arc": "From controlling the message to trusting it to someone who will say what she never could"
+    },
+    {
+      "name": "Kai Nakamura",
+      "role": "antagonist-adjacent — a disillusioned journalist planning a gotcha exposé, not a puff piece",
+      "motivation": "To expose hypocrisy in the climate movement after watching greenwashing destroy his hometown",
+      "arc": "From cynicism to reluctant hope when Amara refuses to parrot polished lines"
+    }
+  ],
+  "acts": [
+    {
+      "name": "Rehearsal",
+      "summary": "Amara arrives at the flooded UN hall and struggles with Dr. Vasik's carefully scripted speech, feeling like a puppet.",
+      "scenes": [
+        "Amara wades through knee-deep water to reach the broadcast chamber, passing murals of climate refugees.",
+        "Dr. Vasik drills Amara on the prepared remarks, shutting down every ad-lib attempt.",
+        "Kai secretly records their tense rehearsal, sensing a story about manufactured authenticity."
+      ]
+    },
+    {
+      "name": "Breaking Point",
+      "summary": "Hours before the broadcast, Amara finds her grandmother's recorded testimony and decides the speech must change.",
+      "scenes": [
+        "Amara listens to her grandmother's voice on an old phone — raw, unscripted memories of rain returning to dried soil.",
+        "She confronts Dr. Vasik, arguing the speech reads like a policy memo, not a human plea.",
+        "Dr. Vasik reveals she originally wanted to speak from the heart too, but decades of diplomacy silenced her."
+      ]
+    },
+    {
+      "name": "The Address",
+      "summary": "Amara goes live and abandons the script, delivering an improvised speech that blends science, story, and a radical call to action.",
+      "scenes": [
+        "The broadcast begins — billions watch as Amara stares into the camera and opens with her grandmother's name.",
+        "Kai, backstage, puts down his exposé notes and starts recording a raw documentary instead.",
+        "Amara's speech goes viral in real time; world leaders begin posting responses before she finishes.",
+        "Final image: Amara walks out of the hall into sunlight, Dr. Vasik standing in the doorway behind her, smiling."
+      ]
+    }
+  ]
+}

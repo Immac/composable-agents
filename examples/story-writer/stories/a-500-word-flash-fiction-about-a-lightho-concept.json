@@ -1,0 +1,51 @@
+{
+  "title": "The Keeper's Tide",
+  "genre": "magical realism",
+  "tone": "melancholic yet tender",
+  "voice": "first-person",
+  "setting": {
+    "time": "An unnamed modern era, seasons collapsing into one another",
+    "place": "A weathered lighthouse on a jagged coast, its glass eye watching a restless sea",
+    "mood": "salt-soaked solitude, the ache of being the last one who stays"
+  },
+  "characters": [
+    {
+      "name": "Maren",
+      "role": "lighthouse keeper",
+      "motivation": "To maintain the light after her predecessor — her mother — vanished into the sea, and to keep a promise she made to both of them",
+      "arc": "Moves from performing duty out of guilt to choosing connection with the sea as an act of love and letting go"
+    },
+    {
+      "name": "The Sea",
+      "role": "companion / antagonist / mirror",
+      "motivation": "To speak back. To draw Maren closer. To reveal what it swallowed.",
+      "arc": "Shifts from indifferent vastness to a voice that offers grief in exchange for grief"
+    }
+  ],
+  "acts": [
+    {
+      "name": "The Keeping",
+      "summary": "Maren tends the lighthouse in ritual silence, then breaks it — whispering to the water as her mother once did.",
+      "scenes": [
+        "Dawn: Maren winds the lamp mechanism, checks the lens for salt damage, logs the weather — all mechanical, all avoidance. A notebook sits open on the desk with her mother's handwriting trailing off mid-sentence.",
+        "Dusk: She steps onto the catwalk and speaks to the sea for the first time — small talk at first, the weather, the shipping lane. The waves rhythm her words back. She feels foolish. She does it again the next night."
+      ]
+    },
+    {
+      "name": "The Conversation",
+      "summary": "The sea begins to answer — not in words, but in offerings. Maren must decide how deep she is willing to listen.",
+      "scenes": [
+        "Weeks later: The tide leaves objects at the base of the rocks — a brass button from her mother's coat, a page torn from a book her mother loved, a stone warm to the touch. Maren talks back in full confessions now: regret, loneliness, the weight of the light.",
+        "A storm night: The sea rises loud and speaks in roar and spray. It demands she name what she's afraid of. She says, 'That you took her and she wanted to go.' The water goes still. Then it offers her a single word, carried in the foam: 'Stay.'"
+      ]
+    },
+    {
+      "name": "The Light",
+      "summary": "Maren makes her choice — not to leave or to drown, but to keep the light for both of them.",
+      "scenes": [
+        "Morning after the storm: Maren finds a new object — a key she doesn't recognize. She understands it opens something her mother left behind, a door into understanding rather than a door out. She pockets it but doesn't rush.",
+        "Final image: Night falls. Maren lights the lamp, walks to the catwalk, and speaks to the sea again — not to mourn, not to question, but to tell it the news of the day. The sea answers. The light turns. The keeping continues, but it is no longer grief. It is a relationship."
+      ]
+    }
+  ]
+}

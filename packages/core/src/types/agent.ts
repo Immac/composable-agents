@@ -8,7 +8,7 @@
 
 import type { Lesson } from './signal.ts';
 
-export type AgentType = 'llm' | 'code' | 'composite';
+export type AgentType = 'llm' | 'code' | 'composite' | 'foreman';
 
 export interface Agent {
   readonly id: string;
@@ -112,6 +112,9 @@ export interface AgentManifest {
   /** Sub-pipeline (only for type: composite) */
   pipeline?: PipelineStep[];
 
+  /** Foreman config (only for type: foreman) */
+  foreman?: ForemanConfig;
+
   /** Communication contracts */
   communication?: {
     consumes?: string[];
@@ -170,6 +173,60 @@ export interface PipelineStep {
   agent?: string;
   config?: Record<string, unknown>;
   onError?: 'halt' | 'continue' | 'skip';
+}
+
+export interface ForemanConfig {
+  /** Agents to run as the generation pipeline */
+  pipeline: ForemanStep[];
+
+  /** Agent IDs to run for critique after each cycle */
+  critics?: string[];
+
+  /** Agent IDs to run when revision is needed */
+  revision?: string[];
+
+  /** Score thresholds for approval */
+  approval?: ApprovalGate[];
+
+  /** Maximum revision cycles (default: 10) */
+  maxCycles?: number;
+
+  /** How many cycles of flat/declining scores trigger plateau (default: 3) */
+  plateauWindow?: number;
+
+  /** Cabinet keys to write as output files after approval */
+  products?: ProductDefinition[];
+
+  /** Cabinet key where per-cycle score history accumulates */
+  scoreHistoryKey?: string;
+}
+
+export interface ForemanStep {
+  agent: string;
+  /** Cabinet keys that must exist before this step runs */
+  waitFor?: string[];
+  config?: Record<string, unknown>;
+}
+
+export interface ApprovalGate {
+  /** Cabinet key where the score lives (e.g. "site/fn-score") */
+  source: string;
+  /** Minimum acceptable score */
+  min: number;
+}
+
+export interface ProductDefinition {
+  /** Cabinet key to read from */
+  cabinetKey: string;
+  /** File path to write to (relative to workspace root) */
+  outputPath: string;
+}
+
+export interface ForemanCycle {
+  cycle: number;
+  scores: Record<string, number>;
+  timestamp: number;
+  status: 'pending' | 'approved' | 'rejected' | 'plateau';
 }
 
 export interface AgentResult {

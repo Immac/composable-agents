@@ -1,0 +1,88 @@
+{
+  "title": "Shadows Over Shinjuku",
+  "genre": "noir detective",
+  "tone": "bleak",
+  "voice": "first-person",
+  "setting": {
+    "time": "1947, post-war occupied Tokyo",
+    "place": "Shinjuku and the back alleys of Kabukichō",
+    "mood": "smoke-filled rooms, rain-slicked streets, and the low hum of a city rebuilding itself on borrowed time"
+  },
+  "characters": [
+    {
+      "name": "Kenji Morimoto",
+      "role": "private detective and former military police investigator",
+      "motivation": "to find a missing woman before the occupation authorities or the yakuza find her first",
+      "arc": "a man who stopped believing in justice during the war learns that some cases demand he try anyway"
+    },
+    {
+      "name": "Reiko Asakura",
+      "role": "the missing woman — a nightclub singer with dangerous connections",
+      "motivation": "to expose a human trafficking ring operating under the cover of the black market",
+      "arc": "revealed gradually through letters and recorded testimonies; transforms from a perceived victim into the story's true architect"
+    },
+    {
+      "name": "Inspector Watanabe",
+      "role": "Tokyo Metropolitan Police liaison, morally灰色 and cooperative with the Americans",
+      "motivation": "to keep his career intact while navigating the impossible demands of both Japanese and American authorities",
+      "arc": "shifts from obstruction to reluctant ally when the case threatens to expose his own compromises"
+    },
+    {
+      "name": "Colonel David Hargrove",
+      "role": "US Army Counterintelligence Corps officer",
+      "motivation": "to prevent any scandal that could jeopardize the occupation's public image",
+      "arc": "begins as a smooth bureaucratic antagonist and ends as a man forced to confront the cost of looking away"
+    },
+    {
+      "name": "Gondo",
+      "role": "yakuza lieutenant who controls the nightclub district",
+      "motivation": "power — specifically, replacing his aging oyabun before the old man's deal with American suppliers closes",
+      "arc": "a charismatic predator whose charm peels back to reveal absolute ruthlessness"
+    }
+  ],
+  "acts": [
+    {
+      "name": "The Vanishing",
+      "summary": "Kenji is hired by a panicked bar owner to find Reiko, who disappeared three nights ago. The trail leads through Shinjuku's jazz clubs, black market stalls, and a police station that wants him to stop asking questions.",
+      "scenes": [
+        "Kenji sits in a rain-beaten office above a shuttered bar, reviewing the case file. The bar owner, Yamada, slides a photograph across the desk — Reiko at the microphone, eyes half-closed, caught mid-song.",
+        "Kenji visits Reiko's apartment in Iidabashi. The landlord says she left with two men in American military jeeps. Nothing was taken, except a small leather journal she always carried.",
+        "At a smoky jazz club in Kabukichō, a piano player named Suzuki tells Kenji that Reiko had been asking questions about shipments arriving at Yokohama port — cargo that was supposed to be rice but weighed too much.",
+        "Inspector Watanabe warns Kenji off the case at a teahouse, citing occupation authority jurisdiction. When Kenji pushes, Watanabe's hand trembles around his cup — not anger, but fear.",
+        "Kenji returns home to find his apartment searched. Nothing stolen. A single American cigarette stub ground into his desk — a message."
+      ]
+    },
+    {
+      "name": "Underworld Currents",
+      "summary": "Kenji follows Reiko's trail into the yakuza's orbit and discovers she was not simply kidnapped — she embedded herself deliberately in Gondo's operation, gathering evidence that someone powerful wanted buried.",
+      "scenes": [
+        "Gondo summons Kenji to a private room in a restaurant behind the Imperial Hotel. Over raw fish and whiskey, Gondo offers a trade: information about Reiko in exchange for Kenji finding a ledger that was stolen from his office.",
+        "Kenji tracks the ledger to a black market dealer in Ueno who has been selling forged identity papers. The dealer is found dead in a canal before Kenji can reach him — throat cut, pockets emptied.",
+        "Through Suzuki, Kenji connects with a network of women who worked in Kabukichō clubs and have been quietly disappearing. Reiko had been helping them escape, using forged papers and smuggled transport.",
+        "Colonel Hargrove invites Kenji to his office at the American compound. The Colonel is polished, friendly, and absolutely clear: the case is closed, the woman is an enemy intelligence asset, and further investigation will result in Kenji's internment.",
+        "Late at night, Kenji breaks into Reiko's apartment again and finds what the searchers missed — a false bottom in a music box containing a partial list of names: Japanese officials, American officers, and trafficking victims marked with dates."
+      ]
+    },
+    {
+      "name": "The Port",
+      "summary": "Kenji and a reluctant Watanabe race to Yokohama port, where the next shipment — and possibly Reiko — is due to arrive. Alliances fracture. The truth about who Reiko really was begins to crystallize.",
+      "scenes": [
+        "Watanabe meets Kenji at a bridge at dawn, visibly shaken. He reveals that the name list matches a missing persons file the police buried under orders from above. He agrees to help, but only if Kenji does not ask him to make a report.",
+        "At the port, Kenji and Watanabe observe the unloading of crates marked as flour. Underneath: young women, drugged and bound, being moved into trucks bearing American military markings.",
+        "Gondo appears with armed men, intending to hijack the shipment and sell the women to buyers in Manchuria. A firefight erupts between Gondo's crew and Hargrove's soldiers, who arrive minutes later.",
+        "In the chaos, Kenji finds Reiko in the hold of a ship — alive, weakened, her journal gone. She tells him she gave the journal to Suzuki for safekeeping. She had been posing as a victim to get close enough to document everything.",
+        "Hargrove, facing exposure, orders the port sealed and all witnesses detained. Watanabe stands between Hargrove's soldiers and Kenji, producing his badge and declaring jurisdiction in Japanese — a gesture that means nothing legally and everything morally."
+      ]
+    },
+    {
+      "name": "Aftermath",
+      "summary": "The immediate danger passes, but justice does not arrive cleanly. Kenji delivers what evidence he can. The system absorbs the scandal. Reiko disappears again — this time by choice.",
+      "scenes": [
+        "Watanabe formally charges Gondo with trafficking, using Reiko's reconstructed testimony and Suzuki's copies of the journal. The American military declines to prosecute its own personnel, citing 'ongoing diplomatic sensitivity.'",
+        "Kenji sits in his office as rain streaks the windows. Yamada comes to collect Reiko's photograph. Kenji tells him she's alive but has left Tokyo. Yamada nods and leaves the photograph on the desk anyway.",
+        "Suzuki plays a quiet set at the club. He tells Kenji that Reiko passed through two nights ago, heading south toward Kobe. She left a song for Kenji — an old melody about a man who walks through rain without an umbrella because he forgot how to look up.",
+        "Final scene: Kenji stands at the bridge where he met Watanabe. The city hums below, half-built and half-destroyed. He lights a cigarette, watches the smoke curl into the gray sky, and walks back toward Shinjuku. There will be another case. There is always another case."
+      ]
+    }
+  ]
+}

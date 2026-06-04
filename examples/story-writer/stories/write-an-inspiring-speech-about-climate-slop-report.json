@@ -1,0 +1,15 @@
+{
+  "score": 90,
+  "verdict": "approved",
+  "issues": [
+    {
+      "rule": "Rule 6: No intensifiers",
+      "severity": "P1",
+      "count": 1,
+      "examples": [
+        "truly my own words from my own heart"
+      ]
+    }
+  ],
+  "summary": "Clean revision. All 20 em dashes eliminated, Chinese artifact removed, contrasting parallelisms reduced to 4 well-spaced instances (2 in character dialogue). Single remaining issue is one 'truly' in Dr. Vasik's dialogue, which reads naturally in speech but is on the banned list."
+}

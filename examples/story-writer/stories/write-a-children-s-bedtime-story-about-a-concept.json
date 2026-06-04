@@ -1,0 +1,69 @@
+{
+  "title": "The Sleepy Moon",
+  "genre": "fantasy",
+  "tone": "warm and soothing",
+  "voice": "third-person-omniscient",
+  "setting": {
+    "time": "a quiet night, long after bedtime",
+    "place": "the star-speckled sky above a small, sleeping village",
+    "mood": "gentle, dreamy, safe"
+  },
+  "characters": [
+    {
+      "name": "Luna",
+      "role": "protagonist — the moon herself",
+      "motivation": "Luna is tired from shining every single night and longs to rest, but she's afraid the world below will be left in the dark",
+      "arc": "Luna learns that asking for help is not a weakness, and that even the sky deserves to sleep"
+    },
+    {
+      "name": "Pip",
+      "role": "ally — a brave little firefly",
+      "motivation": "Pip wants to prove that even the smallest light matters",
+      "arc": "Pip discovers that gathering friends together creates something bigger than any one glow"
+    },
+    {
+      "name": "The Village Children",
+      "role": "supporting — the ones who notice Luna is fading",
+      "motivation": "They want to make sure their friend the moon is okay",
+      "arc": "They learn to care for the things that watch over them"
+    }
+  ],
+  "acts": [
+    {
+      "name": "The Yawning Sky",
+      "summary": "Luna tries to keep shining but can't stop yawning. Stars blink in concern as her glow dims to a soft flicker.",
+      "scenes": [
+        "Opening: Luna rises over the village hills but keeps yawning great golden yawns that make her light wobble",
+        "The stars ask Luna what's wrong, and she admits she hasn't slept in a very long time — hundreds and hundreds of nights",
+        "Luna's glow fades to the faintest pearl shimmer, and the village below grows darker than it has ever been"
+      ]
+    },
+    {
+      "name": "The Tiny Volunteer",
+      "summary": "A firefly named Pip notices the dark sky and rallies the night creatures to keep watch while Luna rests.",
+      "scenes": [
+        "Pip zips up to the clouds and finds Luna curled up, her eyes heavy and drooping",
+        "Pip promises Luna that the night creatures will hold the light, and gently covers Luna with a blanket of thin silver clouds",
+        "Luna gives one last sleepy smile and drifts off, her breathing becoming the soft tide of the night"
+      ]
+    },
+    {
+      "name": "A Thousand Little Lights",
+      "summary": "Pip gathers fireflies, glowworms, and even bioluminescent mushrooms to light the village in Luna's absence.",
+      "scenes": [
+        "Pip flies from garden to garden, pond to pond, calling every glowing creature to rise together",
+        "The village children look up from their windows and see a swarm of tiny lights drifting across the sky like living stars",
+        "The children whisper 'thank you' to the fireflies and tuck themselves back into bed, feeling safe"
+      ]
+    },
+    {
+      "name": "Morning, and a Well-Rested Moon",
+      "summary": "Dawn arrives. Luna wakes refreshed and brighter than ever, grateful and glowing with a new warmth.",
+      "scenes": [
+        "Pip lands gently on Luna's edge as the first pink light of dawn peeks over the hills",
+        "Luna stretches and rises, shining with a silvery glow that seems to laugh, thanking every little light by name",
+        "From that night on, Luna sleeps one small nap every week, and the night creatures take turns keeping watch — a promise between the sky and the smallest lights below"
+      ]
+    }
+  ]
+}

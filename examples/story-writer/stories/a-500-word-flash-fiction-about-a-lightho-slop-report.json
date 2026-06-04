@@ -1,0 +1,16 @@
+{
+  "score": 92,
+  "verdict": "approved",
+  "issues": [
+    {
+      "rule": "Rule 10: Contrasting parallelism overuse",
+      "severity": "P1",
+      "count": 2,
+      "examples": [
+        "it is not angry. It is open. It is *waiting.*",
+        "not out of guilt, not out of promise, but because this is what it looks like when two lonely things decide to stay"
+      ]
+    }
+  ],
+  "summary": "All 13 em dashes eliminated cleanly. Two instances of contrasting parallelism remain, both earning their place: one at the storm's climax, one as the closing line. No banned verbs, adjectives, intensifiers, filler, or weasel words. Structural rhythm is varied and organic. This reads like revised human prose."
+}
