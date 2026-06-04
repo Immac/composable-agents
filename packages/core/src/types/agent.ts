@@ -170,8 +170,21 @@ export interface VisibilityRules {
 }
 
 export interface PipelineStep {
+  /** Agent ID to run (for explicitly-defined agents) */
   agent?: string;
+
+  /** Factory declaration (for parameterized agent creation) */
+  factory?: string;
+  /** Config passed to the factory function */
+  factoryConfig?: Record<string, unknown>;
+  /** Unique ID for this factory instance */
+  as?: string;
+
+  /** Config for explicitly-defined agents */
   config?: Record<string, unknown>;
+  /** Wait conditions before running this step */
+  waitFor?: string[];
+  /** Error handling policy */
   onError?: 'halt' | 'continue' | 'skip';
 }
 

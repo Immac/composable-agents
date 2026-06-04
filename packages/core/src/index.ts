@@ -35,6 +35,9 @@ export { memoryAgent, memoryAgentManifest } from './agents/memory/index';
 // Foreman Agent
 export { createForemanAgent, foremanAgentManifest } from './agents/foreman/index';
 
+// Factory Registry
+export { createFactoryRegistry } from './runtime/factory-registry';
+
 // Lesson handlers
 export {
   applyImmediately,

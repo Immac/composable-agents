@@ -25,6 +25,7 @@ import type {
   ForemanConfig,
   ForemanCycle,
   Cabinet,
+  FactoryRegistry,
 } from '../../types/index.ts';
 
 export const foremanAgentManifest: AgentManifest = {
@@ -39,6 +40,8 @@ export const foremanAgentManifest: AgentManifest = {
 
 export interface ForemanOptions {
   resolveAgent: (id: string) => Agent | undefined;
+  /** Optional factory registry for parameterized agent creation */
+  factoryRegistry?: FactoryRegistry;
 }
 
 function defaultConfig(cfg?: ForemanConfig): Required<ForemanConfig> {
@@ -116,7 +119,48 @@ export function createForemanAgent(options: ForemanOptions): Agent {
           if (missing.length > 0) continue;
         }
 
-        await runAgent(step.agent, 'pipeline');
+        // Resolve agent: factory-declared or explicitly-named
+        let agent: Agent | undefined;
+
+        if (step.factory && options.factoryRegistry) {
+          try {
+            agent = await options.factoryRegistry.instantiate({
+              factory: step.factory,
+              as: step.as,
+              config: step.factoryConfig,
+            });
+            // Register temporarily for the Foreman's resolution
+            if (agent) {
+              // Wrap resolveAgent temporarily for this step
+              const originalResolve = options.resolveAgent;
+              options.resolveAgent = (id: string) => {
+                if (id === (step.as ?? step.factory)) return agent;
+                return originalResolve(id);
+              };
+            }
+          } catch (e) {
+            process.stderr.write(`    ⚠ factory instantiation failed: ${e}
+`);
+          }
+        }
+
+        if (step.agent) {
+          await runAgent(step.agent, 'pipeline');
+        } else if (agent) {
+          // For factory-only steps, run the instantiated agent directly
+          const id = step.as ?? step.factory!;
+          if (signal?.aborted) return { status: 'aborted' };
+          const t = Date.now();
+          try {
+            const result = await agent.execute(context, signal);
+            const elapsed = ((Date.now() - t) / 1000).toFixed(1);
+            process.stderr.write(`    pipeline: ${id} — ${result.status} (${elapsed}s)
+`);
+          } catch (e) {
+            process.stderr.write(`    pipeline: ${id} — error: ${e}
+`);
+          }
+        }
       }
 
       // ===== Approval Loop =====
