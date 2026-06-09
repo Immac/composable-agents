@@ -12,31 +12,33 @@
 export type * from './types/index.ts';
 
 // Runtime — axioms and orchestration
-export { Controller } from './runtime/controller';
-export type { ControllerConfig, RunOptions, RunResult } from './runtime/controller';
-export { SequenceEngine } from './runtime/sequence-engine';
-export type { AgentResolver } from './runtime/sequence-engine';
-export { ConditionEngine } from './runtime/condition-engine';
-export { SignalBusImpl, ReflexEngine, LessonRouter } from './runtime/signal-bus';
-export type { ReflexAction, RoutingResult } from './runtime/signal-bus';
+export { Controller } from './runtime/controller.ts';
+export type { ControllerConfig, RunOptions, RunResult, RuntimeModeOptions } from './runtime/controller.ts';
+export { SequenceEngine } from './runtime/sequence-engine.ts';
+export type { AgentResolver } from './runtime/sequence-engine.ts';
+export { ReactiveEngine } from './runtime/reactive-engine.ts';
+export type { ReactiveEngineConfig } from './runtime/reactive-engine.ts';
+export { ConditionEngine } from './runtime/condition-engine.ts';
+export { SignalBusImpl, ReflexEngine, LessonRouter } from './runtime/signal-bus.ts';
+export type { ReflexAction, RoutingResult } from './runtime/signal-bus.ts';
 
 // Context
-export { Scope } from './context/scope';
-export { CabinetImpl } from './context/cabinet';
-export { BlackboardImpl } from './context/blackboard';
+export { Scope } from './context/scope.ts';
+export { CabinetImpl } from './context/cabinet.ts';
+export { BlackboardImpl } from './context/blackboard.ts';
 
 // Built-in agents
-export { createIdAgent, idAgentManifest } from './agents/id/index';
-export { createJobAgent, jobAgentManifest } from './agents/job/index';
-export { reflexesAgent, reflexesAgentManifest } from './agents/reflexes/index';
-export { learningAgent, learningAgentManifest } from './agents/learning/index';
-export { memoryAgent, memoryAgentManifest } from './agents/memory/index';
+export { createIdAgent, idAgentManifest } from './agents/id/index.ts';
+export { createJobAgent, jobAgentManifest } from './agents/job/index.ts';
+export { reflexesAgent, reflexesAgentManifest } from './agents/reflexes/index.ts';
+export { learningAgent, learningAgentManifest } from './agents/learning/index.ts';
+export { memoryAgent, memoryAgentManifest } from './agents/memory/index.ts';
 
 // Foreman Agent
-export { createForemanAgent, foremanAgentManifest } from './agents/foreman/index';
+export { createForemanAgent, foremanAgentManifest } from './agents/foreman/index.ts';
 
 // Factory Registry
-export { createFactoryRegistry } from './runtime/factory-registry';
+export { createFactoryRegistry } from './runtime/factory-registry.ts';
 
 // Lesson handlers
 export {
@@ -44,19 +46,19 @@ export {
   appendToSuggestionsFile,
   stageForReview,
   log,
-} from './lessons/handlers';
+} from './lessons/handlers.ts';
 
 // Loader
-export { loadAgentYaml, validateAgentManifest, AgentRegistry } from './loader/agent-loader';
-export { loadPipelineYaml, validatePipeline } from './loader/pipeline-loader';
-export type { LoadResult, LoadError } from './loader/agent-loader';
-export type { PipelineConfig, ValidationResult } from './loader/pipeline-loader';
+export { loadAgent, loadAgentYaml, serializeAgent, validateAgentManifest, AgentRegistry } from './loader/agent-loader.ts';
+export { loadPipelineYaml, validatePipeline } from './loader/pipeline-loader.ts';
+export type { LoadResult, LoadError, AgentSource, OutputFormat } from './loader/agent-loader.ts';
+export type { PipelineConfig, ValidationResult } from './loader/pipeline-loader.ts';
 
 // Built-in conditions
-export { builtinEvaluators } from './conditions/built-in';
+export { builtinEvaluators } from './conditions/built-in.ts';
 
 // LLM
-export { MockProvider } from './llm/mock-provider';
-export type { MockResponse } from './llm/mock-provider';
-export { PiProvider } from './llm/pi-provider';
-export type { PiProviderOptions } from './llm/pi-provider';
+export { MockProvider } from './llm/mock-provider.ts';
+export type { MockResponse } from './llm/mock-provider.ts';
+export { PiProvider } from './llm/pi-provider.ts';
+export type { PiProviderOptions } from './llm/pi-provider.ts';

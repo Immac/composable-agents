@@ -10,14 +10,17 @@
  *   composable-agents graph <file>          Show pipeline dependency graph
  *   composable-agents scaffold <type> <name>  Generate agent skeleton
  *   composable-agents explain <file>        Natural language pipeline summary
+ *   composable-agents run <file>            Run pipeline (JSON lines to stdout)
  *   composable-agents --help                Show this help
  */
 
 import { existsSync, readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { loadAgentYaml, validateAgentManifest, AgentRegistry } from 'composable-agents';
+import { loadAgentYaml, validateAgentManifest, AgentRegistry, Controller, ConditionEngine } from 'composable-agents';
 import { loadPipelineYaml, validatePipeline } from 'composable-agents';
+import { builtinEvaluators } from 'composable-agents';
 import type { Agent, AgentManifest } from 'composable-agents';
+import type { ExecutionScope } from 'composable-agents';
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -33,6 +36,7 @@ Usage:
   composable-agents graph <file>              Show pipeline dependency graph (JSON)
   composable-agents scaffold <type> <name>    Generate agent skeleton
   composable-agents explain <file>            Explain a pipeline in natural language
+  composable-agents run <file>                Run a pipeline (JSON lines to stdout)
   composable-agents --help                    Show this help
 
 Types for scaffold: llm-agent, code-agent, composite-agent
@@ -138,6 +142,13 @@ async function main(): Promise<void> {
         console.error(`Error: ${(e as Error).message}`);
         process.exit(1);
       }
+      break;
+    }
+
+    case 'run': {
+      const file = args[1];
+      if (!file) { console.error('Error: specify a pipeline file'); process.exit(1); }
+      await runPipeline(resolve(file));
       break;
     }
 
@@ -286,6 +297,124 @@ function extractAgentIds(steps: any[]): string[] {
     }
   }
   return ids;
+}
+
+async function runPipeline(pipelinePath: string): Promise<void> {
+  // Load pipeline config
+  const config = loadPipelineYaml(pipelinePath);
+  const pipelineDir = resolve(pipelinePath, '..');
+
+  // Load agents from registry
+  const registry = new AgentRegistry();
+  const agents: Agent[] = [];
+  const agentIds = extractAgentIds(config.pipeline);
+
+  for (const id of agentIds) {
+    // Try to find agent.yaml in common locations
+    const locations = [
+      resolve(pipelineDir, 'agents', id, 'agent.yaml'),
+      resolve(pipelineDir, id, 'agent.yaml'),
+      resolve(pipelineDir, `${id}.yaml`),
+    ];
+
+    let found = false;
+    for (const loc of locations) {
+      if (existsSync(loc)) {
+        try {
+          const loaded = loadAgentYaml(loc);
+          const manifest = loaded.manifest;
+          // Try to import the agent's entrypoint
+          const agentDir = resolve(loc, '..');
+          const entrypoint = manifest.code?.entrypoint || './index.ts';
+          const entryPath = resolve(agentDir, entrypoint);
+          if (existsSync(entryPath)) {
+            const mod = await import(entryPath);
+            const execute = mod.default?.execute || mod.execute;
+            if (execute) {
+              const agent: Agent = {
+                id: manifest.id,
+                manifest,
+                execute: (scope: ExecutionScope, signal?: AbortSignal) => execute(scope, signal),
+              };
+              agents.push(agent);
+              found = true;
+              break;
+            }
+          }
+        } catch {
+          // try next location
+        }
+      }
+    }
+
+    if (!found) {
+      jsonLine({ type: 'error', message: `Agent not found: ${id}` });
+      process.exit(1);
+    }
+  }
+
+  // Emit pipeline start
+  jsonLine({ type: 'pipeline_start', pipeline: config.name ?? pipelinePath, agents: agentIds });
+
+  // Create agent map
+  const agentMap = new Map<string, Agent>();
+  for (const agent of agents) {
+    agentMap.set(agent.id, agent);
+  }
+
+  // Create condition engine
+  const conditionEngine = new ConditionEngine();
+  conditionEngine.registerAll(builtinEvaluators);
+
+  // Build pipeline steps
+  const pipeline = config.pipeline.map((step: any) => {
+    if (typeof step === 'string') return { agent: step };
+    return step;
+  });
+
+  const controller = new Controller();
+  const signal = new AbortController().signal;
+  const startTime = Date.now();
+
+  try {
+    const result = await controller.run(
+      config.input ?? 'Pipeline execution',
+      {
+        pipeline,
+        agents: agentMap,
+        conditionEngine,
+        reflexes: config.reflexes,
+        maxCycles: config.learning?.maxCycles,
+        runtime: config.runtime,
+      },
+      signal,
+    );
+
+    // Emit agent completions
+    for (const entry of result.history) {
+      jsonLine({
+        type: 'agent_complete',
+        agent: entry.agentId,
+        status: entry.status,
+      });
+    }
+
+    // Emit pipeline complete
+    jsonLine({
+      type: 'pipeline_complete',
+      status: result.status,
+      duration: Date.now() - startTime,
+      output: result.output,
+      error: result.error,
+    });
+  } catch (err) {
+    jsonLine({ type: 'pipeline_error', error: (err as Error).message });
+    process.exit(1);
+  }
+}
+
+function jsonLine(obj: Record<string, unknown>): void {
+  process.stdout.write(JSON.stringify(obj) + '\n');
 }
 
 function buildEdges(steps: any[]): Array<{ from: string; to: string }> {

@@ -9,5 +9,6 @@ export type * from './agent.ts';
 export type * from './sequence.ts';
 export type * from './signal.ts';
 export type * from './condition.ts';
+export type * from './reactive.ts';
 export type * from './llm.ts';
 export type * from './factory.ts';

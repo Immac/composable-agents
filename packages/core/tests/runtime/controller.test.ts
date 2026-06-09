@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { Controller } from '../../src/runtime/controller';
-import { ConditionEngine } from '../../src/runtime/condition-engine';
-import type { Agent, AgentResult, ExecutionScope } from '../../src/types/index';
+import { Controller } from '../../src/runtime/controller.ts';
+import { ConditionEngine } from '../../src/runtime/condition-engine.ts';
+import { builtinEvaluators } from '../../src/conditions/built-in.ts';
+import type { Agent, AgentResult, ExecutionScope, ReactiveConfig } from '../../src/types/index.ts';
 
 function createMockAgent(id: string, result?: Partial<AgentResult>): Agent {
   return {
@@ -10,6 +11,27 @@ function createMockAgent(id: string, result?: Partial<AgentResult>): Agent {
     async execute(scope: ExecutionScope, _signal?: AbortSignal): Promise<AgentResult> {
       scope.blackboard.task = { ...scope.blackboard.task, output: `${id}: done`, status: 'complete' };
       return { status: 'success', output: `${id}: done`, ...result };
+    },
+  };
+}
+
+function createReactiveAgent(
+  id: string,
+  reactive: ReactiveConfig,
+  execute: (scope: ExecutionScope) => Promise<AgentResult> | AgentResult,
+): Agent {
+  return {
+    id,
+    manifest: {
+      id,
+      type: 'code',
+      version: '0.1.0',
+      purpose: 'reactive test',
+      learning: { channels: [] },
+      reactive,
+    },
+    async execute(scope: ExecutionScope): Promise<AgentResult> {
+      return execute(scope);
     },
   };
 }
@@ -62,7 +84,6 @@ describe('Controller', () => {
       conditionEngine,
     });
 
-    // Missing agent with default continue policy still marks task as failed
     expect(result.status).toBe('failed');
     expect(result.error).toContain('No agent registered');
   });
@@ -123,5 +144,41 @@ describe('Controller', () => {
     });
 
     expect(result.history).toHaveLength(3);
+  });
+
+  it('runs reactive agents until convergence', async () => {
+    const ctrl = new Controller();
+    const conditionEngine = new ConditionEngine();
+    conditionEngine.registerAll(builtinEvaluators);
+
+    const agents = new Map<string, Agent>();
+    agents.set('classify', createReactiveAgent(
+      'classify',
+      { when: 'task-contains(text=bug)', priority: 10 },
+      (scope) => {
+        scope.cabinet.put('bug/classification', 'confirmed');
+        scope.blackboard.task = { ...scope.blackboard.task, output: 'classified', status: 'complete' };
+        return { status: 'success', output: 'classified' };
+      },
+    ));
+    agents.set('fix', createReactiveAgent(
+      'fix',
+      { when: 'cabinet-exists(path=bug/classification)', priority: 5 },
+      (scope) => {
+        scope.cabinet.put('bug/fix', 'done');
+        scope.blackboard.task = { ...scope.blackboard.task, output: 'bug fixed', status: 'complete' };
+        return { status: 'success', output: 'bug fixed' };
+      },
+    ));
+
+    const result = await ctrl.run('bug report', {
+      agents,
+      conditionEngine,
+      runtime: { mode: 'reactive' },
+    });
+
+    expect(result.status).toBe('complete');
+    expect(result.output).toBe('bug fixed');
+    expect(result.history.map((entry) => entry.agentId)).toEqual(['classify', 'fix']);
   });
 });

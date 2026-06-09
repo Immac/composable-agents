@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { validateAgentManifest, AgentRegistry } from '../../src/loader/agent-loader';
-import type { Agent } from '../../src/types/index';
+import { loadAgent, serializeAgent, validateAgentManifest, AgentRegistry } from '../../src/loader/agent-loader';
+import type { Agent, AgentManifest } from '../../src/types/index';
 
 describe('validateAgentManifest', () => {
   it('accepts a valid LLM agent', () => {
@@ -91,5 +91,91 @@ describe('AgentRegistry', () => {
     registry.register({ id: 'a' } as Agent);
     registry.register({ id: 'b' } as Agent);
     expect(registry.ids()).toEqual(['a', 'b']);
+  });
+});
+
+const validManifest: Record<string, unknown> = {
+  id: 'test-agent',
+  type: 'llm',
+  version: '0.1.0',
+  purpose: 'Testing',
+  llm: { prompt_template: './prompt.md' },
+  learning: { channels: [] },
+};
+
+describe('loadAgent', () => {
+  it('loads from a direct object', () => {
+    const result = loadAgent(validManifest);
+    expect(result.manifest.id).toBe('test-agent');
+    expect(result.filePath).toBe('(inline)');
+  });
+
+  it('loads from inline JSON string', () => {
+    const json = JSON.stringify(validManifest);
+    const result = loadAgent(json);
+    expect(result.manifest.id).toBe('test-agent');
+  });
+
+  it('loads from inline YAML string', () => {
+    const yaml = `id: yaml-agent
+type: llm
+version: '0.1.0'
+purpose: Testing
+llm:
+  prompt_template: ./prompt.md
+learning:
+  channels: []`;
+    const result = loadAgent(yaml);
+    expect(result.manifest.id).toBe('yaml-agent');
+  });
+
+  it('throws on .ts/.js file paths', () => {
+    expect(() => loadAgent('agent.ts')).toThrow('Cannot load .ts/.js');
+  });
+
+  it('throws on unknown format', () => {
+    expect(() => loadAgent('not-a-known-format')).toThrow('Cannot detect format');
+  });
+
+  it('validates the loaded manifest', () => {
+    const bad = { id: 'x', type: 'llm' };
+    expect(() => loadAgent(bad)).toThrow('Validation errors');
+  });
+});
+
+describe('serializeAgent', () => {
+  const manifest: AgentManifest = {
+    id: 'test',
+    type: 'llm',
+    version: '0.1.0',
+    purpose: 'Test agent',
+    llm: { prompt_template: './p.md' },
+    learning: { channels: [] },
+  };
+
+  it('serializes to JSON', () => {
+    const json = serializeAgent(manifest, 'json');
+    const parsed = JSON.parse(json);
+    expect(parsed.id).toBe('test');
+    expect(parsed.type).toBe('llm');
+  });
+
+  it('serializes to YAML by default', () => {
+    const yaml = serializeAgent(manifest);
+    expect(yaml).toContain('id: test');
+    expect(yaml).toContain('type: llm');
+  });
+
+  it('round-trips YAML → load → serialize → load', () => {
+    const yaml = serializeAgent(manifest);
+    const loaded = loadAgent(yaml);
+    expect(loaded.manifest.id).toBe(manifest.id);
+    expect(loaded.manifest.type).toBe(manifest.type);
+  });
+
+  it('round-trips JSON → load → serialize → load', () => {
+    const json = serializeAgent(manifest, 'json');
+    const loaded = loadAgent(json);
+    expect(loaded.manifest.id).toBe(manifest.id);
   });
 });

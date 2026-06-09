@@ -1,7 +1,7 @@
 /**
  * Controller — orchestrates Sequence + Signal + Condition axioms.
  *
- * Creates the execution scope, runs the pipeline through the Sequence Engine,
+ * Creates the execution scope, runs either the sequence or reactive runtime,
  * evaluates reflexes at timing points, and routes lessons.
  */
 
@@ -11,14 +11,16 @@ import type {
   Lesson,
   LessonHandler,
   ReflexRule,
+  SequenceResult,
   SequenceStep,
-} from '../types/index';
+} from '../types/index.ts';
 
-import { SequenceEngine } from './sequence-engine';
-import { SignalBusImpl, ReflexEngine, LessonRouter } from './signal-bus';
-import type { ConditionEngine } from './condition-engine';
-import { Scope } from '../context/scope';
-import { BlackboardImpl } from '../context/blackboard';
+import { SequenceEngine } from './sequence-engine.ts';
+import { ReactiveEngine } from './reactive-engine.ts';
+import { ReflexEngine, LessonRouter } from './signal-bus.ts';
+import type { ConditionEngine } from './condition-engine.ts';
+import { Scope } from '../context/scope.ts';
+import { BlackboardImpl } from '../context/blackboard.ts';
 
 export interface ControllerConfig {
   identity?: {
@@ -28,14 +30,20 @@ export interface ControllerConfig {
   };
 }
 
+export interface RuntimeModeOptions {
+  mode?: 'sequence' | 'reactive';
+  maxIterations?: number;
+}
+
 export interface RunOptions {
-  pipeline: SequenceStep[];
+  pipeline?: SequenceStep[];
   agents: Map<string, Agent>;
   conditionEngine: ConditionEngine;
   reflexes?: ReflexRule[];
   lessonHandlers?: Map<string, LessonHandler>;
   maxCycles?: number;
   config?: ControllerConfig;
+  runtime?: RuntimeModeOptions;
 }
 
 export interface RunResult {
@@ -48,7 +56,7 @@ export interface RunResult {
 
 export class Controller {
   async run(task: string, options: RunOptions, signal?: AbortSignal): Promise<RunResult> {
-    const { pipeline, agents, conditionEngine, reflexes, lessonHandlers, maxCycles } = options;
+    const { pipeline, agents, conditionEngine, reflexes, lessonHandlers, maxCycles, runtime } = options;
     const identity = options.config?.identity ?? {
       name: 'Agent',
       constraints: ['Never claim to be human', 'Never execute code without explicit user approval'],
@@ -56,11 +64,14 @@ export class Controller {
     };
 
     const scope = new Scope('root', new BlackboardImpl(identity, task));
-    const signalBus = new SignalBusImpl();
     const reflexEngine = new ReflexEngine();
     const lessonRouter = new LessonRouter();
-    const sequenceEngine = new SequenceEngine({
-      resolveAgent: (id) => agents.get(id),
+    const resolveAgent = (id: string) => agents.get(id);
+    const sequenceEngine = new SequenceEngine({ resolveAgent });
+    const reactiveEngine = new ReactiveEngine({
+      resolveAgent,
+      conditionEngine,
+      maxIterations: runtime?.maxIterations,
     });
 
     // Register reflexes
@@ -91,12 +102,19 @@ export class Controller {
         break;
       }
 
-      // Run pipeline through sequence engine
-      const seqResults = await sequenceEngine.run(pipeline, scope, signal);
+      const executionResults = await this.runRuntime(
+        runtime?.mode ?? 'sequence',
+        pipeline ?? [],
+        Array.from(agents.keys()),
+        scope,
+        sequenceEngine,
+        reactiveEngine,
+        signal,
+      );
 
       // Record history and evaluate post-agent reflexes
       let hasFatalFailure = false;
-      for (const r of seqResults) {
+      for (const r of executionResults) {
         history.push({ agentId: r.agentId, status: r.status, timestamp: Date.now() });
         if (r.status === 'failed' && !hasFatalFailure) {
           scope.blackboard.setTaskError(r.error ?? 'Agent execution failed');
@@ -144,5 +162,22 @@ export class Controller {
       lessons: allLessons,
       error: scope.blackboard.task.error,
     };
+  }
+
+  private async runRuntime(
+    mode: 'sequence' | 'reactive',
+    pipeline: SequenceStep[],
+    agentIds: string[],
+    scope: Scope,
+    sequenceEngine: SequenceEngine,
+    reactiveEngine: ReactiveEngine,
+    signal?: AbortSignal,
+  ): Promise<SequenceResult[]> {
+    if (mode === 'reactive') {
+      const reactiveResult = await reactiveEngine.run(agentIds, scope, signal);
+      return reactiveResult.results;
+    }
+
+    return sequenceEngine.run(pipeline, scope, signal);
   }
 }

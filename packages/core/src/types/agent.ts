@@ -7,6 +7,7 @@
  */
 
 import type { Lesson } from './signal.ts';
+import type { ReactiveConfig } from './reactive.ts';
 
 export type AgentType = 'llm' | 'code' | 'composite' | 'foreman';
 
@@ -134,6 +135,9 @@ export interface AgentManifest {
 
   /** Visibility rules for composite agents */
   visibility?: VisibilityRules;
+
+  /** Reactive runtime trigger declaration */
+  reactive?: ReactiveConfig;
 }
 
 export interface DeterministicCheck {

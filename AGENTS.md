@@ -22,11 +22,8 @@ cd packages/cli && npx . run pipeline.yaml
 ## Rules
 
 - Three axioms: Sequence, Signal, Condition
-- SPEC.md is the contract — don't implement what isn't in it
-- Agents use `createAgent(config, deps)` factories, not classes
-- Use `.ts` extensions in imports
-- Cabinet is the protocol for inter-agent communication
-- Conditions are pure queries — no side effects
+- SPEC.md is the contract
+- Everything else is enforced by agents
 
 ## Skills
 

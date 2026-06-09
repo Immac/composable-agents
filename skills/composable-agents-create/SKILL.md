@@ -12,8 +12,10 @@ An agent is a self-contained directory with an `agent.yaml` declaration and an i
 | Type | When to use | Implementation |
 |------|-------------|----------------|
 | `llm` | Task needs language understanding, generation, or semantic analysis | Prompt template (`.md`) |
-| `code` | Task is deterministic — validation, transformation, checking | Code module (`.ts`) |
+| `code` | Task is deterministic — validation, transformation, checking, echoing, simple logic | Code module (`.ts`) |
 | `composite` | Task decomposes into sub-agents | Pipeline config referencing other agents |
+
+**Default to `code` for simple tasks.** If the agent just transforms data, echoes input, validates something, or runs a fixed algorithm — use `code`. Only use `llm` when the task genuinely needs language understanding.
 
 ## 2. Scaffold
 
