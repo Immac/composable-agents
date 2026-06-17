@@ -1,0 +1,13 @@
+{
+  "id": "story-critic",
+  "type": "llm",
+  "version": "0.1.0",
+  "purpose": "Review story draft for issues and produce a polished final version",
+  "llm": {
+    "temperature": 0.3,
+    "max_tokens": 2048
+  },
+  "learning": {
+    "channels": []
+  }
+}

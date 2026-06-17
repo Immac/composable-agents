@@ -90,7 +90,7 @@ export function loadAgent(source: AgentSource, filePath?: string): LoadResult {
   return { manifest: raw as AgentManifest, filePath: resolvedPath };
 }
 
-/** Backward-compatible alias */
+/** @deprecated Use loadAgent instead — handles both YAML and JSON automatically */
 export const loadAgentYaml = loadAgent;
 
 function parseYAMLContent(content: string, source: string): Record<string, unknown> {
@@ -119,7 +119,7 @@ function parseJSONContent(content: string, source: string): Record<string, unkno
 /**
  * Serialize an AgentManifest to a string.
  */
-export function serializeAgent(manifest: AgentManifest, format: OutputFormat = 'yaml'): string {
+export function serializeAgent(manifest: AgentManifest, format: OutputFormat = 'json'): string {
   if (format === 'json') {
     return JSON.stringify(manifest, null, 2) + '\n';
   }

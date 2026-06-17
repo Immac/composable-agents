@@ -1,0 +1,22 @@
+{
+  "id": "story-revision-writer",
+  "type": "llm",
+  "version": "0.1.0",
+  "purpose": "Revise a story draft based on critic feedback while preserving the author's voice",
+  "deterministic": {
+    "pre_checks": [
+      {
+        "condition": "NOT cabinet-exists(path=story/draft)",
+        "action": "skip-agent",
+        "message": "No draft to revise — run story-writer first"
+      }
+    ]
+  },
+  "llm": {
+    "temperature": 0.7,
+    "max_tokens": 2048
+  },
+  "learning": {
+    "channels": []
+  }
+}

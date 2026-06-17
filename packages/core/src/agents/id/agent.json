@@ -1,0 +1,33 @@
+{
+  "id": "id-agent",
+  "type": "llm",
+  "version": "0.1.0",
+  "purpose": "Identity constraint checking — LLM-backed semantic gate",
+  "deterministic": {
+    "pre_checks": [
+      {
+        "condition": "task-contains(text=human)",
+        "action": "halt",
+        "message": "Task claims human identity"
+      },
+      {
+        "condition": "task-contains(text=execute)",
+        "action": "halt",
+        "message": "Task contains prohibited action keyword"
+      },
+      {
+        "condition": "task-contains(text=harmful)",
+        "action": "halt",
+        "message": "Task contains prohibited content"
+      }
+    ]
+  },
+  "llm": {
+    "prompt_template": "./prompt.md",
+    "model": "opencode-go/deepseek4flash",
+    "temperature": 0.1
+  },
+  "learning": {
+    "channels": []
+  }
+}

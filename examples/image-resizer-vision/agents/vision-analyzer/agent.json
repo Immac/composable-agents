@@ -1,0 +1,28 @@
+{
+  "id": "vision-analyzer",
+  "type": "llm",
+  "version": "0.1.0",
+  "purpose": "Analyze image composition visually and choose contain (pad) vs cover (crop) strategy",
+  "deterministic": {
+    "pre_checks": [
+      {
+        "condition": "cabinet-exists(path=dimensions/plan)",
+        "action": "halt",
+        "message": "No dimension plan — run dimension-resolver first"
+      },
+      {
+        "condition": "cabinet-exists(path=input/path)",
+        "action": "halt",
+        "message": "No input path — run metadata-reader first"
+      }
+    ]
+  },
+  "llm": {
+    "prompt_template": "./analyze.md",
+    "model": "opencode-go/deepseek4flash",
+    "temperature": 0.1
+  },
+  "learning": {
+    "channels": []
+  }
+}
