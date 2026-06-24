@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft-07/schema#",
   "$id": "https://composable-agents.dev/schemas/agent-v1.json",
   "title": "Composable Agent Declaration",
-  "description": "Schema for agent.yaml files in the Composable Agents framework",
+  "description": "Schema for agent.json files in the Composable Agents framework",
   "type": "object",
   "required": ["id", "type", "purpose", "learning"],
   "properties": {

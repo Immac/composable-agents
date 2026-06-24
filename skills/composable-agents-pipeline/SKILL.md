@@ -37,7 +37,7 @@ pipeline:
 
 Agents are resolved from:
 1. Built-in agents (id-agent, job-agent, reflexes-agent, learning-agent, memory-agent)
-2. Project agents directory (`agents/*/agent.yaml`)
+2. Project agents directory (`agents/*/agent.json`)
 3. Absolute paths
 
 Validation cross-references all agent IDs:
@@ -121,7 +121,7 @@ pipeline:
 When a composite agent runs an inner pipeline, its parent scope sees nothing unless explicitly declared:
 
 ```yaml
-# agents/supervisor/agent.yaml
+# agents/supervisor/agent.json
 id: supervisor
 type: composite
 pipeline:

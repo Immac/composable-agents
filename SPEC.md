@@ -257,10 +257,41 @@ Each branch in a parallel group gets an isolated temporary cabinet. On join:
 
 ## 6. Agent Declaration Format
 
-Agents declare themselves in YAML files alongside their code:
+Agents declare themselves in JSON files alongside their code (JSON is valid YAML, so the YAML parser handles it):
+
+```json
+{
+  "$schema": "https://composable-agents.dev/schemas/agent-v1.json",
+  "id": "my-agent",
+  "type": "llm",
+  "version": "0.1.0",
+  "purpose": "One-line description",
+
+  "deterministic": {
+    "pre_checks": [
+      { "condition": "has-error", "action": "skip" }
+    ],
+    "post_processing": [
+      { "condition": "output.empty", "action": "retry" }
+    ]
+  },
+
+  "llm": {
+    "prompt_template": "./prompt.md",
+    "model": "opencode-go/deepseek4flash",
+    "temperature": 0.1
+  },
+
+  "learning": {
+    "channels": []
+  }
+}
+```
+
+Or equivalently in YAML:
 
 ```yaml
-# agent.yaml
+# agent.json
 id: my-agent
 type: llm                    # llm | code | composite
 version: 0.1.0
@@ -353,7 +384,7 @@ Per-step error handling:
 | `skip` | Rollback context changes, record error, proceed to next step |
 | `halt` | Stop the pipeline immediately, propagate error |
 
-Default per agent type can be set in agent.yaml.
+Default per agent type can be set in agent.json.
 
 ---
 
@@ -364,7 +395,7 @@ Default per agent type can be set in agent.yaml.
 - [x] Blackboard (typed working state) + Cabinet (namespaced artifact storage)
 - [x] Per-composite scoping with explicit visibility rules
 - [x] Parallel execution with isolated cabinets and configurable merge
-- [x] Data-driven agent declarations (agent.yaml)
+- [x] Data-driven agent declarations (agent.json/agent.yaml)
 - [x] Condition evaluator registry with AND/OR/NOT composition
 - [x] String expression parser for conditions (syntactic sugar)
 - [x] Reflex system with 6 timing modes and block/discard/abort actions
@@ -376,7 +407,7 @@ Default per agent type can be set in agent.yaml.
 - [x] Standalone CLI
 - [x] Snapshot/rollback per scope
 - [x] Full test coverage of axioms and shipped patterns
-- [x] JSON Schema for agent.yaml and pipeline.yaml
+- [x] JSON Schema for agent.json and pipeline.yaml
 - [x] Validation CLI (validate, validate-pipeline) with structured JSON output
 - [x] Introspection CLI (inspect, graph, explain, trace)
 - [x] Scaffold CLI (generate agent skeletons)
@@ -463,7 +494,7 @@ The framework is designed to be used not just by human developers but by AI codi
 |:---|---:|
 | **Structured output over prose** | CLI commands produce JSON — LLMs parse JSON reliably. Natural language is for humans. |
 | **Validate early, validate often** | A JSON Schema + validation CLI catches mistakes before they reach runtime. LLMs can fix based on structured errors. |
-| **Declarative over imperative** | `agent.yaml` is self-describing. An LLM can read a directory of agent files and understand the system without running it. |
+| **Declarative over imperative** | `agent.json` is self-describing. An LLM can read a directory of agent files and understand the system without running it. |
 | **One convention, not many** | One way to declare an agent, one way to compose conditions, one way to scope visibility. Reduces LLM guesswork. |
 | **Teach the pattern, not the implementation** | Skills (SKILL.md) teach *what to build*, not *how the internals work*. The LLM doesn't need to know the runtime. |
 
@@ -471,8 +502,8 @@ The framework is designed to be used not just by human developers but by AI codi
 
 | Artifact | Format | Purpose |
 |:---|---:|:---:|
-| JSON Schema | `schemas/agent-v1.json`, `schemas/pipeline-v1.json` | Validate agent.yaml against the schema. Published as URL + bundled in package. |
-| Validation CLI | `npx composable-agents validate` | Parse + validate agent.yaml/pipeline.yaml. Outputs structured JSON errors with fix suggestions. |
+| JSON Schema | `schemas/agent-v1.json`, `schemas/pipeline-v1.json` | Validate agent.json against the schema. Published as URL + bundled in package. |
+| Validation CLI | `npx composable-agents validate` | Parse + validate agent.json/pipeline.yaml. Outputs structured JSON errors with fix suggestions. |
 | Validation pipeline | `npx composable-agents validate-pipeline` | Cross-reference agent IDs, check condition composition, verify learning channel routing. |
 | Introspection CLI | `npx composable-agents inspect` | Show agent graph, input/output contracts, condition evaluators, learning channels, visibility rules. |
 | Graph CLI | `npx composable-agents graph` | Emit DOT or JSON dependency graph of a pipeline for visualization. |
@@ -484,9 +515,10 @@ The framework is designed to be used not just by human developers but by AI codi
 
 Published at a stable URL and bundled in the npm package. LLMs can reference it to constrain output:
 
-```yaml
-# agent.yaml
-$schema: https://composable-agents.dev/schemas/agent-v1.json
+```json
+{
+  "$schema": "https://composable-agents.dev/schemas/agent-v1.json"
+}
 ```
 
 The schema enforces:
@@ -505,7 +537,7 @@ All validation commands emit structured JSON:
 ```json
 {
   "valid": false,
-  "file": "agents/my-agent/agent.yaml",
+  "file": "agents/my-agent/agent.json",
   "errors": [
     {
       "path": "learning.channels[0].handler",
@@ -534,7 +566,7 @@ The framework ships with pi skills that teach LLMs how to work with it. Skills l
 
 | Skill | What it teaches |
 |:---|---:|
-| `composable-agents-create` | How to write an agent.yaml + implement the agent. Includes template generation guidance. |
+| `composable-agents-create` | How to write an agent.json + implement the agent. Includes template generation guidance. |
 | `composable-agents-pipeline` | How to compose agents into pipelines with reflexes, learning loops, and error policies. |
 | `composable-agents-debug` | How to inspect agent behavior, trace condition evaluations, verify scope and lesson routing. |
 

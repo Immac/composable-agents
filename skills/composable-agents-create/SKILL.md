@@ -5,7 +5,7 @@ description: Create a new agent for the Composable Agents framework. Walks throu
 
 # Creating an Agent
 
-An agent is a self-contained directory with an `agent.yaml` declaration and an implementation file.
+An agent is a self-contained directory with an `agent.json` declaration and an implementation file.
 
 ## 1. Choose the agent type
 
@@ -34,16 +34,41 @@ Each scaffold command creates:
 
 ```
 agents/my-agent/
-├── agent.yaml       # Declaration (edit this)
+├── agent.json       # Declaration (edit this, JSON)
 ├── prompt.md        # LLM prompt template (llm type only)
 └── index.ts         # Code entrypoint (code type only)
 ```
 
-## 3. Fill in the agent.yaml
+## 3. Fill in the agent.json
 
-```yaml
-# agents/my-agent/agent.yaml
-$schema: https://composable-agents.dev/schemas/agent-v1.json
+```json
+{
+  "$schema": "https://composable-agents.dev/schemas/agent-v1.json",
+  "id": "my-agent",
+  "type": "llm",
+  "version": "0.1.0",
+  "purpose": "Describe what this agent does in one line",
+
+  "deterministic": {
+    "pre_checks": [
+      { "condition": "has-error", "action": "skip" }
+    ],
+    "post_processing": [
+      { "condition": "output.empty", "action": "retry" }
+    ]
+  },
+
+  "llm": {
+    "prompt_template": "./prompt.md",
+    "model": "opencode-go/deepseek4flash",
+    "temperature": 0.7
+  },
+
+  "learning": {
+    "channels": []
+  }
+}
+```
 id: my-agent
 type: llm
 version: 0.1.0
@@ -103,8 +128,8 @@ Built-in variables available in all templates:
 
 | Variable | Source |
 |----------|--------|
-| `{{agent.id}}` | agent.yaml id |
-| `{{agent.purpose}}` | agent.yaml purpose |
+| `{{agent.id}}` | agent.json id |
+| `{{agent.purpose}}` | agent.json purpose |
 | `{{task.input}}` | Blackboard task input |
 | `{{task.goal}}` | Blackboard task goal |
 | `{{constraints}}` | Blackboard identity constraints |
@@ -139,18 +164,22 @@ export async function execute(
 ## 6. Validate
 
 ```bash
-npx composable-agents validate agents/my-agent/agent.yaml
+npx composable-agents validate agents/my-agent/agent.json
 ```
 
 Fix any errors. The output includes structured fix suggestions.
 
 ## 7. Register in a pipeline
 
-Add your agent to a pipeline.yaml:
+Add your agent to a pipeline.json:
 
-```yaml
-pipeline:
-  - id-agent
-  - my-agent            # ← your new agent
-  - learning-agent
+```json
+{
+  "name": "default",
+  "pipeline": [
+    "id-agent",
+    "my-agent",
+    "learning-agent"
+  ]
+}
 ```

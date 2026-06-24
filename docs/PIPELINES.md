@@ -120,7 +120,7 @@ pipeline:
 When a composite agent runs an inner pipeline, the parent scope sees nothing unless explicitly declared:
 
 ```yaml
-# agents/supervisor/agent.yaml
+# agents/supervisor/agent.json
 visibility:
   expose:
     cabinet:
@@ -166,7 +166,7 @@ lesson_routing:
 ## Validation
 
 ```bash
-npx composable-agents validate-pipeline pipeline.yaml
-npx composable-agents graph pipeline.yaml
-npx composable-agents explain pipeline.yaml
+npx composable-agents validate-pipeline pipeline.json
+npx composable-agents graph pipeline.json
+npx composable-agents explain pipeline.json
 ```

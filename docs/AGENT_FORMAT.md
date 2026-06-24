@@ -1,8 +1,29 @@
 # Agent Format
 
-Agents are declared in YAML files alongside their code. The format is validated against a JSON Schema at load time.
+Agents are declared in JSON (or YAML) files alongside their code. The format is validated against a JSON Schema at load time. JSON is the canonical format; YAML is also supported for backward compatibility.
 
-## Minimal Example
+## Minimal Example (JSON)
+
+```json
+{
+  "id": "my-agent",
+  "type": "llm",
+  "version": "0.1.0",
+  "purpose": "Translate text from English to Japanese",
+
+  "llm": {
+    "prompt_template": "./prompt.md",
+    "model": "opencode-go/deepseek4flash",
+    "temperature": 0.3
+  },
+
+  "learning": {
+    "channels": []
+  }
+}
+```
+
+## Minimal Example (YAML)
 
 ```yaml
 # agents/my-agent/agent.yaml
@@ -20,7 +41,40 @@ learning:
   channels: []
 ```
 
-## Full Reference
+## Full Reference (JSON)
+
+```json
+{
+  "$schema": "https://composable-agents.dev/schemas/agent-v1.json",
+  "id": "my-agent",
+  "type": "llm",
+  "version": "0.1.0",
+  "purpose": "Translate text from English to Japanese",
+
+  "deterministic": {
+    "pre_checks": [
+      { "condition": "has-error", "action": "skip", "message": "Skipping due to error" }
+    ],
+    "post_processing": [
+      { "condition": "output.empty", "action": "retry" }
+    ]
+  },
+
+  "llm": {
+    "prompt_template": "./prompt.md",
+    "model": "opencode-go/deepseek4flash",
+    "temperature": 0.7
+  },
+
+  "learning": {
+    "channels": [
+      { "type": "modify-prompt", "handler": "apply-immediately" }
+    ]
+  }
+}
+```
+
+## Full Reference (YAML)
 
 ```yaml
 id: my-agent                   # Required. Unique, lowercase kebab-case.
@@ -91,8 +145,8 @@ LLM prompt templates support these built-in variables:
 
 | Variable | Source |
 |----------|--------|
-| `{{agent.id}}` | agent.yaml `id` |
-| `{{agent.purpose}}` | agent.yaml `purpose` |
+| `{{agent.id}}` | agent.json `id` |
+| `{{agent.purpose}}` | agent.json `purpose` |
 | `{{task.input}}` | Blackboard task input |
 | `{{task.goal}}` | Blackboard task goal |
 | `{{constraints}}` | Blackboard identity constraints |
@@ -100,7 +154,7 @@ LLM prompt templates support these built-in variables:
 ## Validation
 
 ```bash
-npx composable-agents validate agents/my-agent/agent.yaml
+npx composable-agents validate agents/my-agent/agent.json
 ```
 
 Output is structured JSON with fix suggestions:
@@ -108,12 +162,12 @@ Output is structured JSON with fix suggestions:
 ```json
 {
   "valid": false,
-  "file": "agents/my-agent/agent.yaml",
+  "file": "agents/my-agent/agent.json",
   "errors": [
     {
       "path": "learning.channels",
       "message": "Missing required field: learning.channels",
-      "fix": "Add 'learning: { channels: [] }' to your agent.yaml"
+      "fix": "Add 'learning: { channels: [] }' to your agent declaration"
     }
   ]
 }

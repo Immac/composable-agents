@@ -1,5 +1,5 @@
 /**
- * Pipeline YAML Loader — parses pipeline.yaml files.
+ * Pipeline Loader — parses pipeline.yaml/pipeline.json files. Uses YAML parser (JSON is valid YAML).
  *
  * Validates agent references against a registry and checks
  * condition/reflex configurations.

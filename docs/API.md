@@ -256,7 +256,7 @@ Purpose: normalize agent definitions from YAML, JSON, or inline objects into an 
 Use `loadAgent()` when your tooling accepts author-facing manifests in multiple formats.
 
 ```ts
-const { manifest, filePath } = loadAgent('agents/my-agent/agent.yaml');
+const { manifest, filePath } = loadAgent('agents/my-agent/agent.json');
 const inline = loadAgent({
   id: 'test-agent',
   type: 'code',

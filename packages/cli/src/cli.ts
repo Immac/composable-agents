@@ -4,8 +4,8 @@
  * Composable Agents CLI
  *
  * Usage:
- *   composable-agents validate <file>       Validate an agent.yaml
- *   composable-agents validate-pipeline <file>  Validate a pipeline.yaml
+ *   composable-agents validate <file>       Validate an agent.json
+ *   composable-agents validate-pipeline <file>  Validate a pipeline.json
  *   composable-agents inspect <file>        Show agent structure
  *   composable-agents graph <file>          Show pipeline dependency graph
  *   composable-agents scaffold <type> <name>  Generate agent skeleton
@@ -16,7 +16,7 @@
 
 import { existsSync, readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { loadAgentYaml, validateAgentManifest, AgentRegistry, Controller, ConditionEngine } from 'composable-agents';
+import { loadAgent, validateAgentManifest, AgentRegistry, Controller, ConditionEngine } from 'composable-agents';
 import { loadPipelineYaml, validatePipeline } from 'composable-agents';
 import { builtinEvaluators } from 'composable-agents';
 import type { Agent, AgentManifest } from 'composable-agents';
@@ -30,8 +30,8 @@ function printUsage(): void {
 Composable Agents CLI — tools for building composable agent systems
 
 Usage:
-  composable-agents validate <file>           Validate an agent.yaml file
-  composable-agents validate-pipeline <file>  Validate a pipeline.yaml file
+  composable-agents validate <file>           Validate an agent.json file
+  composable-agents validate-pipeline <file>  Validate a pipeline.json file
   composable-agents inspect <file>            Show agent structure as JSON
   composable-agents graph <file>              Show pipeline dependency graph (JSON)
   composable-agents scaffold <type> <name>    Generate agent skeleton
@@ -49,7 +49,7 @@ async function main(): Promise<void> {
       const file = args[1];
       if (!file) { console.error('Error: specify a file path'); process.exit(1); }
       try {
-        const result = loadAgentYaml(resolve(file));
+        const result = loadAgent(resolve(file));
         console.log(JSON.stringify({ valid: true, agent: result.manifest.id, file: result.filePath }, null, 2));
       } catch (e) {
         console.log(JSON.stringify({ valid: false, error: (e as Error).message }, null, 2));
@@ -83,7 +83,7 @@ async function main(): Promise<void> {
       const file = args[1];
       if (!file) { console.error('Error: specify a file path'); process.exit(1); }
       try {
-        const result = loadAgentYaml(resolve(file));
+        const result = loadAgent(resolve(file));
         console.log(JSON.stringify(result.manifest, null, 2));
       } catch (e) {
         console.error(`Error: ${(e as Error).message}`);
@@ -163,29 +163,26 @@ function scaffoldAgent(type: string, name: string): void {
   const dir = resolve(process.cwd(), 'agents', name);
   mkdirSync(dir, { recursive: true });
 
-  let yamlContent = '';
+  let manifest: Record<string, unknown> = {};
   let extraFiles: Array<{ name: string; content: string }> = [];
 
   switch (type) {
     case 'llm-agent':
-      yamlContent = `id: ${name}
-type: llm
-version: 0.1.0
-purpose: "Describe what this agent does"
-
-deterministic:
-  pre_checks:
-    - condition: "has-error"
-      action: skip
-
-llm:
-  prompt_template: ./prompt.md
-  model: opencode-go/deepseek4flash
-  temperature: 0.7
-
-learning:
-  channels: []
-`;
+      manifest = {
+        id: name,
+        type: 'llm',
+        version: '0.1.0',
+        purpose: 'Describe what this agent does',
+        deterministic: {
+          pre_checks: [{ condition: 'has-error', action: 'skip' }],
+        },
+        llm: {
+          prompt_template: './prompt.md',
+          model: 'opencode-go/deepseek4flash',
+          temperature: 0.7,
+        },
+        learning: { channels: [] },
+      };
       extraFiles.push({
         name: 'prompt.md',
         content: `You are {{agent.id}}. Your purpose is {{agent.purpose}}.
@@ -199,23 +196,20 @@ Respond to the task above.
       break;
 
     case 'code-agent':
-      yamlContent = `id: ${name}
-type: code
-version: 0.1.0
-purpose: "Describe what this agent does"
-
-deterministic:
-  pre_checks:
-    - condition: "has-error"
-      action: skip
-
-code:
-  entrypoint: ./index.ts
-  timeout: 30000
-
-learning:
-  channels: []
-`;
+      manifest = {
+        id: name,
+        type: 'code',
+        version: '0.1.0',
+        purpose: 'Describe what this agent does',
+        deterministic: {
+          pre_checks: [{ condition: 'has-error', action: 'skip' }],
+        },
+        code: {
+          entrypoint: './index.ts',
+          timeout: 30000,
+        },
+        learning: { channels: [] },
+      };
       extraFiles.push({
         name: 'index.ts',
         content: `import type { ExecutionScope, AgentResult } from 'composable-agents';
@@ -240,24 +234,19 @@ export async function execute(
       break;
 
     case 'composite-agent':
-      yamlContent = `id: ${name}
-type: composite
-version: 0.1.0
-purpose: "Describe what this composite agent does"
-
-pipeline:
-  - sub-agent-1
-  - sub-agent-2
-
-learning:
-  channels: []
-
-visibility:
-  expose:
-    cabinet:
-      - from: output/*
-        as: results/
-`;
+      manifest = {
+        id: name,
+        type: 'composite',
+        version: '0.1.0',
+        purpose: 'Describe what this composite agent does',
+        pipeline: ['sub-agent-1', 'sub-agent-2'],
+        learning: { channels: [] },
+        visibility: {
+          expose: {
+            cabinet: [{ from: 'output/*', as: 'results/' }],
+          },
+        },
+      };
       break;
 
     default:
@@ -265,13 +254,13 @@ visibility:
       process.exit(1);
   }
 
-  writeFileSync(resolve(dir, 'agent.yaml'), yamlContent);
+  writeFileSync(resolve(dir, 'agent.json'), JSON.stringify(manifest, null, 2) + '\n');
   for (const file of extraFiles) {
     writeFileSync(resolve(dir, file.name), file.content);
   }
 
   console.log(`Created ${type} "${name}" in ${dir}/`);
-  console.log(`  - agents/${name}/agent.yaml`);
+  console.log(`  - agents/${name}/agent.json`);
   for (const file of extraFiles) {
     console.log(`  - agents/${name}/${file.name}`);
   }
@@ -310,8 +299,11 @@ async function runPipeline(pipelinePath: string): Promise<void> {
   const agentIds = extractAgentIds(config.pipeline);
 
   for (const id of agentIds) {
-    // Try to find agent.yaml in common locations
+    // Try to find agent.json or agent.yaml in common locations
     const locations = [
+      resolve(pipelineDir, 'agents', id, 'agent.json'),
+      resolve(pipelineDir, id, 'agent.json'),
+      resolve(pipelineDir, `${id}.json`),
       resolve(pipelineDir, 'agents', id, 'agent.yaml'),
       resolve(pipelineDir, id, 'agent.yaml'),
       resolve(pipelineDir, `${id}.yaml`),
@@ -321,7 +313,7 @@ async function runPipeline(pipelinePath: string): Promise<void> {
     for (const loc of locations) {
       if (existsSync(loc)) {
         try {
-          const loaded = loadAgentYaml(loc);
+          const loaded = loadAgent(loc);
           const manifest = loaded.manifest;
           // Try to import the agent's entrypoint
           const agentDir = resolve(loc, '..');

@@ -11,7 +11,7 @@ Always start by validating — many issues are caught before runtime:
 
 ```bash
 # Validate all agent declarations
-npx composable-agents validate agents/*/agent.yaml
+npx composable-agents validate agents/*/agent.json
 
 # Validate the pipeline
 npx composable-agents validate-pipeline pipelines/default.yaml
@@ -97,7 +97,7 @@ Step 2/3: job-agent
 ## 4. Inspect agent structure
 
 ```bash
-npx composable-agents inspect agents/my-agent/agent.yaml
+npx composable-agents inspect agents/my-agent/agent.json
 ```
 
 Shows the full agent contract:
@@ -148,33 +148,33 @@ Produces a natural language summary:
 
 ```bash
 # Check which condition caused the skip
-npx composable-agents trace pipeline.yaml --focus skipped
+npx composable-agents trace pipeline.json --focus skipped
 ```
 
 ### Lessons not reaching their target
 
 ```bash
 # Check learning channels
-npx composable-agents inspect agents/target-agent/agent.yaml --channels
+npx composable-agents inspect agents/target-agent/agent.json --channels
 
 # Trace lesson routing
-npx composable-agents trace pipeline.yaml --lessons
+npx composable-agents trace pipeline.json --lessons
 ```
 
 ### Cabinet seems empty
 
 ```bash
 # Check what was stored at each step
-npx composable-agents trace pipeline.yaml --cabinet
+npx composable-agents trace pipeline.json --cabinet
 
 # Check visibility rules
-npx composable-agents inspect agents/composite-agent/agent.yaml --visibility
+npx composable-agents inspect agents/composite-agent/agent.json --visibility
 ```
 
 ### Reflex didn't fire
 
 ```bash
 # Check condition at the right timing point
-npx composable-agents trace pipeline.yaml --reflexes
+npx composable-agents trace pipeline.json --reflexes
 # Shows every reflex evaluation, including ones that didn't match
 ```

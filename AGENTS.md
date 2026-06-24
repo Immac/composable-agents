@@ -15,7 +15,7 @@ Deterministic runtime for composable AI agents.
 
 ```bash
 cd packages/core && npm test    # 146 tests
-cd packages/cli && npx . run pipeline.yaml
+cd packages/cli && npx . run pipeline.json
 ```
 
 Rules are enforced by agents. Run the validator to check compliance.
